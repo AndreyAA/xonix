@@ -170,7 +170,7 @@ public class State {
             items.add(item);
         }
         head.init();
-
+        bonuses.clear();
         initBusyCells = calcBusyCells();
         updateProgress();
         score = 0;

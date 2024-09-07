@@ -18,8 +18,6 @@ class Engine {
     private final State state;
     private final KeyboardInput keyboard;
     private final Random random = new Random();
-    private final int TIME_FOR_BONUS_MS = 5000;
-    private final int BONUS_LIVE_MS = 10000;
 
     public Engine(State state, KeyboardInput keyboard) {
         this.state = state;
@@ -99,11 +97,6 @@ class Engine {
             //moveBullets();
 
         }
-
-/*        if (state.initNewWave) {
-            state.bullets.clear();
-        }*/
-
 
         int tickTime = (int) (System.currentTimeMillis() - start);
         if (tickTime > 16) {
