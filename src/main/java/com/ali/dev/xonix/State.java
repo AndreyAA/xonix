@@ -9,10 +9,10 @@ import static com.ali.dev.xonix.Config.GRID_SIZE_Y;
 public class State {
 
     protected final List<Level> levels = List.of(
-            new Level(10, 4, 3, 1, 97),
             new Level(1, 0, 2, 1, 40),
             new Level(5, 1, 3, 1, 90),
-            new Level(7, 2, 1,1, 95)
+            new Level(7, 2, 1,1, 95),
+            new Level(10, 4, 3, 1, 97)
     );
     private final ScoreCalculator scoreCalculator = new ScoreCalculator();
     protected int waveWaitTimeMs = 5000;

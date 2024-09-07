@@ -197,6 +197,13 @@ public class XonixApp extends JFrame {
             bufferGraphics.drawString("Paused", Config.WIDTH / 2 - 20, Config.HEIGHT / 2);
         }
 
+        if (state.isReadyForNewLevel) {
+            bufferGraphics.setColor(Color.WHITE);
+            bufferGraphics.setFont(TIMER_FONT);
+            String mes = "Next Level: ";
+            bufferGraphics.drawString(mes + (state.curLevel+2), Config.WIDTH / 2 - mes.length()*bufferGraphics.getFont().getSize()/3, Config.HEIGHT / 2);
+        }
+
         // Draw the buffer on the screen
         g.drawImage(buffer, 0, 0, this);
         int timePaint = (int) (System.currentTimeMillis() - start);
