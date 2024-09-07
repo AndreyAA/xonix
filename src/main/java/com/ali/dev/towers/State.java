@@ -14,6 +14,7 @@ public class State {
             new Level(7, 2, 1, 95),
             new Level(10, 4, 1, 97)
     );
+    private final ScoreCalculator scoreCalculator = new ScoreCalculator();
     protected int waveWaitTimeMs = 5000;
     protected EntityType[][] entityGrid;
     protected long tickId = 0;
@@ -22,7 +23,6 @@ public class State {
     protected int mouseY = -1;
     protected int highlightedRow = -1;
     protected int highlightedCol = -1;
-    protected int endRow, endCol;
     protected int score = 0;
     protected int lifes = 3;
     protected int breakItems = 3;
@@ -39,13 +39,32 @@ public class State {
     List<Bonus> bonuses = new ArrayList<>();
     double progress;
     boolean isReadyForNewLevel;
+    private int initBusyCells;
 
     public State(EventListener eventListener, EntityType[][] entityTypes) {
         this.eventListener = eventListener;
         entityGrid = entityTypes; // todo copy
     }
 
-    public void calcProgress() {
+    public void updateProgress() {
+        double newProgress = calcProgress();
+        int deltaScore = scoreCalculator.calcScore(progress, newProgress, this);
+        progress = newProgress;
+        score+=deltaScore;
+
+        if (progress * 100.0 >= getCurLevel().levelThreshold) {
+            isReadyForNewLevel = true;
+            nextLevelTick = tickId + waveWaitTimeMs / Config.TICK_TIME_MS;
+        }
+    }
+
+    private double calcProgress() {
+        int sum = calcBusyCells() - initBusyCells;
+        int total = GRID_SIZE_Y * GRID_SIZE_X - initBusyCells;
+        return sum * 1.0 / total;
+    }
+
+    private int calcBusyCells() {
         int sum = 0;
         for (int y = 0; y < GRID_SIZE_Y; y++) {
             for (int x = 0; x < GRID_SIZE_X; x++) {
@@ -54,14 +73,7 @@ public class State {
                 }
             }
         }
-
-        int total = GRID_SIZE_Y * GRID_SIZE_X;
-        progress = sum * 1.0 / total;
-
-        if (progress * 100.0 >= getCurLevel().levelThreshold) {
-            isReadyForNewLevel = true;
-            nextLevelTick = tickId + waveWaitTimeMs / Config.TICK_TIME_MS;
-        }
+        return sum;
     }
 
     public Level getCurLevel() {
@@ -156,7 +168,10 @@ public class State {
         }
         head.init();
 
-        calcProgress();
+        initBusyCells = calcBusyCells();
+        updateProgress();
+        score = 0;
+
     }
 
     public void initNewWave() {

@@ -221,9 +221,9 @@ public class XonixApp extends JFrame {
         bufferGraphics.drawString("Remain: " + state.breakItems, 120, 60);
 //        bufferGraphics.drawString("Money: " + state.money, 240, 60);
         bufferGraphics.drawString("Score: " + state.score, 240, 60);
-        bufferGraphics.drawString("Progress: " + String.format("%6.2f", state.progress * 100), 360, 60);
+        bufferGraphics.drawString("Progress: " + String.format("%6.2f", state.progress * 100), 450, 60);
         bufferGraphics.drawString("Target: " +
-                String.format("%6.2f", state.getCurLevel().levelThreshold), 580, 60);
+                String.format("%6.2f", state.getCurLevel().levelThreshold), 650, 60);
     }
 
     private void drawShape(Graphics2D g2d, int row, int col, EntityType entityType) {

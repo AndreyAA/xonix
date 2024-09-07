@@ -181,7 +181,7 @@ class Engine {
             });
         }
 
-        state.calcProgress();
+        state.updateProgress();
     }
 
     private XY processGrid(HashSet<Object> itemsSet, EntityType[][] busy) {
