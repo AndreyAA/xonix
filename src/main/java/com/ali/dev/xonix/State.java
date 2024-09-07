@@ -1,7 +1,9 @@
 package com.ali.dev.xonix;
 
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.*;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static com.ali.dev.xonix.Config.GRID_SIZE_X;
@@ -181,16 +183,17 @@ public class State {
 
 
     enum BonusType {
-        LIFE((s)->{
-            s.lifes++;
-        }),
-        HEAD_SPEED((s)->{
-            s.head.velocity = 2;
-        });
-        Consumer<State> consumer;
+        LIFE(s-> s.lifes++, Images.bonusLife),
+        HEAD_SPEED(s->
+            s.head.velocity = 2
+        , Images.speedUp);
 
-        BonusType(Consumer<State> consumer) {
+        Consumer<State> consumer;
+        Image image;
+
+        BonusType(Consumer<State> consumer, Image image) {
             this.consumer = consumer;
+            this.image = image;
         }
     }
 
