@@ -228,6 +228,10 @@ public class XonixApp extends JFrame {
         bufferGraphics.drawString("Progress: " + String.format("%6.2f", state.progress * 100), 450, 60);
         bufferGraphics.drawString("Target: " +
                 String.format("%6.2f", state.getCurLevel().levelThreshold), 650, 60);
+
+        state.activeBonuses.forEach(b->{
+            bufferGraphics.drawImage(b.type.image, calcX(GRID_SIZE_X-5 + b.type.ordinal()), calcY(0)-2*CELL_SIZE, null);
+        });
     }
 
     private void drawShape(Graphics2D g2d, int row, int col, EntityType entityType) {

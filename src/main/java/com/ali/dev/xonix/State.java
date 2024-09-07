@@ -40,6 +40,7 @@ public class State {
     // items
     List<Item> items = new ArrayList<>();
     List<Bonus> bonuses = new ArrayList<>();
+    List<Bonus> activeBonuses = new ArrayList<>();
     double progress;
     boolean isReadyForNewLevel;
     private int initBusyCells;
@@ -183,17 +184,19 @@ public class State {
 
 
     enum BonusType {
-        LIFE(s-> s.lifes++, Images.bonusLife),
-        HEAD_SPEED(s->
-            s.head.velocity = 2
-        , Images.speedUp);
+        LIFE(s -> s.lifes++, s-> {}, Images.bonusLife, false),
+        HEAD_SPEED(s -> s.head.velocity = 2, s -> s.head.velocity = 1, Images.speedUp, true);
 
-        Consumer<State> consumer;
-        Image image;
+        final Consumer<State> apply;
+        final Consumer<State> rejecter;
+        final Image image;
+        final boolean durable;
 
-        BonusType(Consumer<State> consumer, Image image) {
-            this.consumer = consumer;
+        BonusType(Consumer<State> apply, Consumer<State> rejecter, Image image, boolean durable) {
+            this.apply = apply;
+            this.rejecter = rejecter;
             this.image = image;
+            this.durable = durable;
         }
     }
 

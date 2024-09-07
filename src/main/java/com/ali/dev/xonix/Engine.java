@@ -75,6 +75,10 @@ class Engine {
 
             //hide bonuses
             state.bonuses.removeIf(b -> b.lastTick < state.tickId);
+            state.activeBonuses.stream()
+                    .filter(b -> b.lastTick < state.tickId)
+                    .forEach(b -> b.type.rejecter.accept(state));
+            state.activeBonuses.removeIf(b -> b.lastTick < state.tickId);
 
             if (state.tickId % (TIME_FOR_BONUS_MS / TICK_TIME_MS) == 0) {
                 var b = new State.Bonus();
@@ -146,7 +150,11 @@ class Engine {
 
         var bonuses = state.bonuses.stream().filter(b -> hasCollision(state.head, b.pos, b.size)).collect(Collectors.toList());
         bonuses.forEach(b -> {
-            b.type.consumer.accept(state);
+            b.type.apply.accept(state);
+            if (b.type.durable) {
+                b.lastTick = state.tickId + 10000/TICK_TIME_MS;
+                state.activeBonuses.add(b);
+            }
         });
         state.bonuses.removeAll(bonuses);
 
