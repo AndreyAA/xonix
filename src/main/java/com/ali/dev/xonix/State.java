@@ -1,7 +1,5 @@
 package com.ali.dev.xonix;
 
-import org.w3c.dom.css.Rect;
-
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -47,7 +45,8 @@ public class State {
     List<Bonus> activeBonuses = new ArrayList<>();
     double progress;
     boolean isReadyForNewLevel;
-    private int initBusyCells;
+    int initBusyCells;
+    int busyCells;
 
     public State(EventListener eventListener, EntityType[][] entityTypes) {
         this.eventListener = eventListener;
@@ -67,7 +66,12 @@ public class State {
     }
 
     private double calcProgress() {
-        int sum = calcBusyCells() - initBusyCells;
+        busyCells = calcBusyCells();
+        return calcProgressLight(busyCells);
+    }
+
+    double calcProgressLight(int busyCells) {
+        int sum = busyCells - initBusyCells;
         int total = GRID_SIZE_Y * GRID_SIZE_X - initBusyCells;
         return sum * 1.0 / total;
     }

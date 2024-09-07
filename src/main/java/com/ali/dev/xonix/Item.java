@@ -75,6 +75,7 @@ class Item {
                 // Отражение по вертикали
                 if (type==ItemType.DESTROYER && state.entityGrid[newRow][curCol].isDestroyable) {
                     state.entityGrid[newRow][curCol]=EntityType.FREE;
+                    state.busyCells--;
                 }
                 shift = new XY(shift.x, -1 * shift.y);
             }
@@ -84,6 +85,7 @@ class Item {
                 // Отражение по горизонтали
                 if (type==ItemType.DESTROYER && state.entityGrid[curRow][newCol].isDestroyable) {
                     state.entityGrid[curRow][newCol]=EntityType.FREE;
+                    state.busyCells--;
                 }
                 shift = new XY(-1 * shift.x, shift.y);
             }

@@ -60,24 +60,7 @@ class Engine {
             }
         }
 
-        if (isActive(TickAction.MouseEvent)) {
-            if (state.mouseEvent2 != null) {
-                processMouseEvent2();
-                state.mouseEvent2 = null;
-            }
-            if (state.mouseEvent != null) {
-//                processMouseEvent();
-                state.mouseEvent = null;
-            }
-        }
-
         if (isActive(TickAction.ItemMoving)) {
-/*            if (state.nextWaveTick != 0 && state.tickId == state.nextWaveTick) {
-                state.groupCount = state.curWave.countItems();
-                state.nextWaveTick = 0;
-                System.out.println(state.curWave);
-            }*/
-
             //hide bonuses
             state.bonuses.removeIf(b -> b.lastTick < state.tickId);
             state.activeBonuses.stream()
@@ -94,17 +77,10 @@ class Engine {
                 state.bonuses.add(b);
             }
 
-
-            if (state.tickId % 1 == 0) {
+                // one tick - move 1 pixel
                 moveHead();
-            }
-
-            // one tick - move 1 pixel
-            if (state.tickId % 1 == 0) {
                 moveItems();
-            }
-            //moveBullets();
-
+                state.progress = state.calcProgressLight(state.busyCells);
         }
 
         int tickTime = (int) (System.currentTimeMillis() - start);
@@ -294,146 +270,7 @@ class Engine {
         }*/
     }
 
-   /* private void processMouseEvent() {
-        MouseEvent e = state.mouseEvent;
-        int row = calcRow(e.getY());
-        int col = calcCol(e.getX());
 
-        if (row >= 1 && row < GRID_SIZE_Y && col >= 1 && col < GRID_SIZE_X-1) {
-            if (state.activeButton == 0) {
-                // remove
-                if (state.entityGrid[row][col] != EntityType.BORDER) {
-                    clearCell(row, col);
-                    state.towers.removeIf(t -> t.col == col && t.row == row);
-                    System.out.println("clear block row:" + row + ", col:" + col);
-                    updateItemPaths();
-                }
-            } else if (state.activeButton == 1) {
-                if (state.entityGrid[row][col]==null && state.money >= BLOCK_PRICE) {
-                    state.money -= BLOCK_PRICE;
-                    markBorder(row, col, true, EntityType.BLOCK);
-                    *//*if (checkAllPaths(row, col)) {
-                        System.out.println("block row:" + row + ", col:" + col);
-                        updateItemPaths();
-                    } else {
-                        clearCell(row, col);
-                    }*//*
-                }
-            } else if (state.activeButton == 2 || state.activeButton == 3) {
-                if (state.entityGrid[row][col]==null && state.money >= TOWER1_PRICE) {
-                    state.money -= TOWER1_PRICE;
-                    markBorder(row, col, true, state.currentEntityType);
- *//*                   if (checkAllPaths(row, col)) {
-                        TowerType type = (state.activeButton == 2) ? TowerType.STD : TowerType.FREEZE;
-                        state.towers.add(new Tower(row, col, 1, TOWER_RANGE, type));
-                        System.out.println("tower row:" + row + ", col:" + col);
-                        updateItemPaths();
-                    } else {
-                        clearCell(row, col);
-                    }*//*
-//                repaint();
-                }
-            }
-        }
-        if (row == GRID_SIZE_Y && (col >= GRID_SIZE_X / 2) && (col <= GRID_SIZE_X / 2 + 3)) {
-            state.activeButton = col - GRID_SIZE_X / 2;
-            System.out.println("activeButton: " + state.activeButton);
-        }
-
-        // process selected tower
-        if (state.selectedTower!=null) {
-            int shift = (state.selectedTower.type == TowerType.STD)?2:3;
-
-            if (row > GRID_SIZE_Y && row <= GRID_SIZE_Y + 3 && (col == GRID_SIZE_X / 2 +shift)) {
-                int tempAction2 = row - GRID_SIZE_Y;
-                int nextLevelMoney = state.selectedTower.levels.getLevel(tempAction2).nextLevelMoney();
-                if (!state.selectedTower.levels.inUpgrade()
-                        && state.money>=nextLevelMoney) {
-                    state.activeButton2 = tempAction2;
-
-                    processClickUpgrade(state.selectedTower, state.activeButton2);
-                    System.out.println("Up tower: range:" + state.selectedTower.range +
-                            ", damage:" + state.selectedTower.damage +
-                            ", rate:" + state.selectedTower.rate
-                    );
-                }
-            }
-*//*            int base = GRID_SIZE_X / 2 + 6;
-            if (row == GRID_SIZE_Y && col >= base && col < base + ShootStrategy.values().length) {
-                int strategy = col - base;
-                state.selectedTower.shootStrategy = ShootStrategy.values()[strategy];
-            }*//*
-        }
-    }*/
-
-  /*  private void processClickUpgrade(Tower selectedTower, int action) {
-        switch (action) {
-            case 1: {
-                // range
-                selectedTower.levels.range.startFrom = state.tickId + TOWER_UPGRADE_TIME_MS /TICK_TIME_MS;
-                selectedTower.levels.range.inited = state.tickId;
-                state.money -= selectedTower.levels.range.nextLevelMoney();
-                selectedTower.levels.range.consumer = (item)->{
-                    item.levels.range.value+=1;
-                    item.range+=CELL_SIZE;
-                };
-                return;
-            }
-            case 2: {
-                // damage
-                selectedTower.levels.damage.startFrom = state.tickId + TOWER_UPGRADE_TIME_MS /TICK_TIME_MS;
-                selectedTower.levels.damage.inited = state.tickId;
-                state.money -= selectedTower.levels.damage.nextLevelMoney();
-                selectedTower.levels.damage.consumer = (item)->{
-                    item.levels.damage.value+=1;
-                    item.damage+= selectedTower.initDamage;
-                };
-                return;
-            }
-            case 3: {
-                // rate 30-> 15 -> 7
-                int cRate = Math.max(5, selectedTower.rate / 2);
-                if (cRate!=selectedTower.rate) {
-                    selectedTower.levels.rate.inited = state.tickId;
-                    selectedTower.levels.rate.startFrom = state.tickId + TOWER_UPGRADE_TIME_MS /TICK_TIME_MS;
-                    state.money -= selectedTower.levels.rate.nextLevelMoney();
-                    selectedTower.levels.rate.consumer = (item)->{
-                        item.levels.rate.value+=1;
-                        selectedTower.rate = Math.max(5, cRate);
-                    };
-                }
-                return;
-            }
-            default:
-        }
-    }*/
-
-    private void logXY() {
-        System.out.println("x:" + state.head.pos.x + ", y:" + state.head.pos.y);
-    }
-
-    private void processMouseEvent2() {
-        int row2 = (state.mouseEvent2 != null) ? calcRow(state.mouseEvent2.getY()) : 0;
-        int col2 = (state.mouseEvent2 != null) ? calcCol(state.mouseEvent2.getX()) : 0;
-/*        var sTower = state.towers.stream().filter(t -> t.col == col2 && t.row == row2).findAny().orElse(null);
-        if (sTower!=null) {
-            state.selectedTower = sTower;
-        }*/
-    }
-
-    private void clearCell(int row, int col) {
-        state.markBorder(row, col, false, EntityType.FREE);
-    }
-
-    private void clearGrid() {
-        for (int row = 0; row < GRID_SIZE_Y; row++) {
-            for (int col = 0; col < GRID_SIZE_X; col++) {
-                clearCell(row, col);
-            }
-        }
-        state.items.clear();
-        state.score = 0;
-    }
 
     private void moveItems() {
         for (Item item : state.items) {
