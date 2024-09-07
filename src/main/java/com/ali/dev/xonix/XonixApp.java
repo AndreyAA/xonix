@@ -1,11 +1,9 @@
 package com.ali.dev.xonix;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 import static com.ali.dev.xonix.Config.*;
@@ -175,7 +173,7 @@ public class XonixApp extends JFrame {
         // Draw the items
 
         for (Item item : state.items) {
-            bufferGraphics.setColor(calcColor(item.type));
+            bufferGraphics.setColor(calcColor(item.area, item.type));
             bufferGraphics.fillOval((int) item.currentX + CELL_SIZE / 4, (int) item.currentY + CELL_SIZE / 4, 3 * CELL_SIZE / 4, 3 * CELL_SIZE / 4);
         }
 
@@ -209,8 +207,11 @@ public class XonixApp extends JFrame {
         }
     }
 
-    private Color calcColor(ItemType type) {
-        return type == ItemType.InField ? Color.ORANGE : Color.RED;
+    private Color calcColor(ItemArea type, ItemType itemType) {
+        if (itemType == ItemType.DESTROYER) {
+            return Color.YELLOW;
+        }
+        return type == ItemArea.InField ? Color.ORANGE : Color.RED;
     }
 
     private void highLightCell(Color color, int col, int row) {
@@ -241,6 +242,10 @@ public class XonixApp extends JFrame {
 
         switch (entityType) {
             case BORDER:
+                g2d.setColor(Color.DARK_GRAY);
+                paintRect(g2d, x, y, 0);
+                break;
+            case BLOCK:
                 g2d.setColor(Color.GRAY);
                 paintRect(g2d, x, y, 0);
                 break;

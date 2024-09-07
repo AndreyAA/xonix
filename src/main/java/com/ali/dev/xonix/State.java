@@ -12,10 +12,10 @@ import static com.ali.dev.xonix.Config.GRID_SIZE_Y;
 public class State {
 
     protected final List<Level> levels = List.of(
-            new Level(1, 0, 2, 1, 40),
-            new Level(5, 1, 3, 1, 90),
-            new Level(7, 2, 1,1, 95),
-            new Level(10, 4, 3, 1, 97)
+            new Level(2, 2,0, 2, 1, 80),
+            new Level(5, 0,1, 3, 1, 90),
+            new Level(7, 0,2, 1,1, 95),
+            new Level(10, 0, 4, 3, 1, 97)
     );
     private final ScoreCalculator scoreCalculator = new ScoreCalculator();
     protected int waveWaitTimeMs = 5000;
@@ -152,13 +152,19 @@ public class State {
         int n = getCurLevel().itemInField;
         int width = GRID_SIZE_X - 4;
         int height = GRID_SIZE_Y - 4;
+        int destroyers = getCurLevel().itemInFieldDestroyers;
         Random rnd = new Random();
         for (int i = 0; i < n; i++) {
+            ItemType itemType = ItemType.STD;
+            if (destroyers>0 && i<destroyers) {
+                itemType = ItemType.DESTROYER;
+            }
             int x = rnd.nextInt(width) + 2;
             int y = rnd.nextInt(height) + 2;
             int d = rnd.nextInt(4);
             XY dir = XY.DIRECTIONS[d];
-            Item item = new Item(new XY(x, y), new XY(dir.x, dir.y), ItemType.InField, getCurLevel().velocityInField);
+            Item item = new Item(new XY(x, y), new XY(dir.x, dir.y), itemType,
+                    ItemArea.InField, getCurLevel().velocityInField);
             items.add(item);
         }
 
@@ -167,7 +173,7 @@ public class State {
             int d = rnd.nextInt(4);
             XY dir = XY.DIRECTIONS[d];
             Item item = new Item(new XY(rnd.nextInt(GRID_SIZE_X), GRID_SIZE_Y - 1), new XY(dir.x, dir.y),
-                    ItemType.OutFiled, getCurLevel().velocityOutField);
+                    ItemType.STD, ItemArea.OutFiled, getCurLevel().velocityOutField);
             items.add(item);
         }
         head.init();
@@ -186,8 +192,8 @@ public class State {
     enum BonusType {
         LIFE(s -> s.lifes++, s-> {}, Images.bonusLife, false),
         HEAD_SPEED(s -> s.head.velocity = 2, s -> s.head.velocity = 1, Images.speedUp, true),
-        FREEZE(s -> s.items.stream().filter(i->i.type==ItemType.InField).forEach(Item::slowDown),
-                s -> s.items.stream().filter(i->i.type==ItemType.InField).forEach(Item::restore),
+        FREEZE(s -> s.items.stream().filter(i->i.area == ItemArea.InField).forEach(Item::slowDown),
+                s -> s.items.stream().filter(i->i.area == ItemArea.InField).forEach(Item::restore),
                 Images.freeze, true);
 
         final Consumer<State> apply;
@@ -275,13 +281,18 @@ public class State {
 
     public static class Level {
         int itemInField;
+        int itemInFieldDestroyers;
         int itemOutField;
         double velocityInField;
         double velocityOutField;
         double levelThreshold;
 
-        public Level(int itemInField, int itemOutField, double velocityInField, double velocityOutField, double levelThreshold) {
+        public Level(int itemInField, int itemInFieldDestroyers, int itemOutField, double velocityInField, double velocityOutField, double levelThreshold) {
             this.itemInField = itemInField;
+            this.itemInFieldDestroyers = itemInFieldDestroyers;
+            if (itemInField<itemInFieldDestroyers) {
+                throw new IllegalArgumentException("itemInFieldDestroyers");
+            }
             this.itemOutField = itemOutField;
             this.velocityInField = velocityInField;
             this.velocityOutField = velocityOutField;

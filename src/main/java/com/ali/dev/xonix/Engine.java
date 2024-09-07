@@ -137,13 +137,13 @@ class Engine {
                 } else {
                     // продолжаем движение
                     state.head.curPath.add(newPos);
-                    state.markBorder(newPos.y, newPos.x, true, EntityType.BORDER);
+                    state.markBorder(newPos.y, newPos.x, true, EntityType.BLOCK);
                 }
             } else if (!state.entityGrid[newPos.y][newPos.x].isBusy) {
                 System.out.println("start moving");
                 state.head.startPoint = state.head.pos;
                 state.head.curPath.add(newPos);
-                state.markBorder(newPos.y, newPos.x, true, EntityType.BORDER);
+                state.markBorder(newPos.y, newPos.x, true, EntityType.BLOCK);
             }
             state.head.pos = newPos;
         }
@@ -173,7 +173,7 @@ class Engine {
 
 
         var itemsSet = new HashSet<>();
-        state.items.stream().filter(i -> i.type == ItemType.InField).forEach(i -> itemsSet.add(new XY(i.pos.x, i.pos.y)));
+        state.items.stream().filter(i -> i.area == ItemArea.InField).forEach(i -> itemsSet.add(new XY(i.pos.x, i.pos.y)));
         // copy busy arr todo use the same array
         for (int i = 0; i < state.entityGrid.length; i++) {
             for (int j = 0; j < state.entityGrid[0].length; j++) {
@@ -185,7 +185,7 @@ class Engine {
         if (emptyPoint != null) {
             //System.out.println("empty point: " + emptyPoint);
             isEmptyArea(itemsSet, state.entityGrid, emptyPoint, (y, x) -> {
-                state.entityGrid[y][x] = EntityType.BORDER;
+                state.entityGrid[y][x] = EntityType.BLOCK;
             });
         }
 
@@ -250,7 +250,7 @@ class Engine {
         }
         if (!busy[newY][newX].isBusy) {
             points.add(new XY(newX, newY));
-            busy[newY][newX] = EntityType.BORDER;
+            busy[newY][newX] = EntityType.BLOCK;
             consumer.accept(newY, newX);
         }
         boolean res = itemsSet.contains(new XY(newX, newY));

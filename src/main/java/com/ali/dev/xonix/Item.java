@@ -5,11 +5,16 @@ import com.ali.dev.xonix.State.XY;
 import static com.ali.dev.xonix.Config.*;
 import static com.ali.dev.xonix.XonixApp.*;
 
-enum ItemType {
+enum ItemArea {
     InField, OutFiled
 }
 
+enum ItemType {
+    STD, DESTROYER
+}
+
 class Item {
+    final ItemArea area;
     final ItemType type;
     XY pos;
     double currentX, currentY;
@@ -17,11 +22,12 @@ class Item {
     double velocity;
     double prevVelocity;
 
-    Item(XY pos, XY shift, ItemType type, double velocity) {
+    Item(XY pos, XY shift, ItemType type, ItemArea area, double velocity) {
         this.pos = pos;
         this.currentX = calcX(pos.x);
         this.currentY = calcY(pos.y);
         this.shift = shift;
+        this.area = area;
         this.type = type;
         this.velocity = velocity;
         this.prevVelocity = velocity;
@@ -52,7 +58,7 @@ class Item {
             return;
         }
 
-        if (type == ItemType.OutFiled) {
+        if (area == ItemArea.OutFiled) {
             if (newY <= MIN_Y - HALF_CELL || newRow <= -1 || newRow >= state.entityGrid.length || !state.entityGrid[newRow][curCol].isBusy) {
                 // Отражение от горизонтали
                 shift = new XY(shift.x, -1 * shift.y);
@@ -64,13 +70,21 @@ class Item {
             }
         } else {
 
-            if (newRow < 0 || newRow >= state.entityGrid.length || state.entityGrid[newRow][curCol].isBusy) {
+            boolean isBusy = state.entityGrid[newRow][curCol].isBusy;
+            if (newRow < 0 || newRow >= state.entityGrid.length || isBusy) {
                 // Отражение по вертикали
+                if (type==ItemType.DESTROYER && state.entityGrid[newRow][curCol].isDestroyable) {
+                    state.entityGrid[newRow][curCol]=EntityType.FREE;
+                }
                 shift = new XY(shift.x, -1 * shift.y);
             }
 
-            if (newCol < 0 || newCol >= state.entityGrid[0].length || state.entityGrid[curRow][newCol].isBusy) {
+            boolean isBusy2 = state.entityGrid[curRow][newCol].isBusy;
+            if (newCol < 0 || newCol >= state.entityGrid[0].length || isBusy2) {
                 // Отражение по горизонтали
+                if (type==ItemType.DESTROYER && state.entityGrid[curRow][newCol].isDestroyable) {
+                    state.entityGrid[curRow][newCol]=EntityType.FREE;
+                }
                 shift = new XY(-1 * shift.x, shift.y);
             }
         }
