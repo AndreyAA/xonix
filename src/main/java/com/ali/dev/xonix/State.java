@@ -2,6 +2,7 @@ package com.ali.dev.xonix;
 
 import java.awt.event.MouseEvent;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.ali.dev.xonix.Config.GRID_SIZE_X;
 import static com.ali.dev.xonix.Config.GRID_SIZE_Y;
@@ -180,7 +181,17 @@ public class State {
 
 
     enum BonusType {
-        LIFE
+        LIFE((s)->{
+            s.lifes++;
+        }),
+        HEAD_SPEED((s)->{
+            s.head.velocity = 2;
+        });
+        Consumer<State> consumer;
+
+        BonusType(Consumer<State> consumer) {
+            this.consumer = consumer;
+        }
     }
 
     public static class Head {
@@ -189,12 +200,14 @@ public class State {
         XY shift;
         Set<XY> curPath;
         XY startPoint;
+        int velocity;
 
         public void init() {
             pos = new XY(GRID_SIZE_X / 2, 1);
             shift = new XY(0, 0);
             curPath = new HashSet<>();
             startPoint = null;
+            velocity = 1;
         }
     }
 

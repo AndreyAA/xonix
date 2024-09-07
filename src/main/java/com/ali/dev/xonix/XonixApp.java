@@ -11,6 +11,7 @@ import java.io.IOException;
 import static com.ali.dev.xonix.Config.*;
 
 public class XonixApp extends JFrame {
+
     private final KeyboardInput keyboard = new KeyboardInput();
     private final BufferedImage buffer;
     private final Graphics2D bufferGraphics;
@@ -19,7 +20,8 @@ public class XonixApp extends JFrame {
     private final Engine engine;
     private final Timer timer;
 
-    private final Image bonus;
+    private final Image bonusLife;
+    private final Image bonusSpeedup;
 
     public XonixApp() throws IOException {
         setTitle("Grid App");
@@ -28,7 +30,8 @@ public class XonixApp extends JFrame {
         setLocationRelativeTo(null);
 //        this.state = Serializator.load("towersStateProd");
         state = new State(null, new EntityType[GRID_SIZE_Y][GRID_SIZE_X]);
-        bonus = ImageIO.read(new File("hart20.png"));
+        bonusLife = ImageIO.read(new File("hart20.png"));
+        bonusSpeedup = ImageIO.read(new File("speedup.png"));
         state.initData();
         buffer = new BufferedImage(Config.WIDTH, Config.HEIGHT + 60, BufferedImage.TYPE_INT_RGB);
         bufferGraphics = buffer.createGraphics();
@@ -168,7 +171,12 @@ public class XonixApp extends JFrame {
         // Draw the start and end points
         bufferGraphics.setColor(Color.BLUE);
         state.bonuses.forEach(b -> {
-            bufferGraphics.drawImage(bonus, calcX(b.pos.x), calcY(b.pos.y), null);
+
+            var image = switch (b.type) {
+                case LIFE -> bonusLife;
+                case HEAD_SPEED -> bonusSpeedup;
+            };
+            bufferGraphics.drawImage(image, calcX(b.pos.x), calcY(b.pos.y), null);
         });
 
 

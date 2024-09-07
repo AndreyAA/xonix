@@ -18,7 +18,7 @@ class Engine {
     private final State state;
     private final KeyboardInput keyboard;
     private final Random random = new Random();
-    private final int TIME_FOR_BONUS_MS = 20000;
+    private final int TIME_FOR_BONUS_MS = 10000;
     private final int BONUS_LIVE_MS = 10000;
 
     public Engine(State state, KeyboardInput keyboard) {
@@ -81,14 +81,14 @@ class Engine {
             if (state.tickId % (TIME_FOR_BONUS_MS / TICK_TIME_MS) == 0) {
                 var b = new State.Bonus();
                 b.pos = new XY(random.nextInt(GRID_SIZE_X - 2), random.nextInt(GRID_SIZE_Y - 2));
-                b.type = State.BonusType.LIFE;
+                b.type = State.BonusType.values()[random.nextInt(State.BonusType.values().length)];
                 b.size = new XY(2, 2);
                 b.lastTick = state.tickId + BONUS_LIVE_MS / TICK_TIME_MS;
                 state.bonuses.add(b);
             }
 
 
-            if (state.tickId % 5 == 0) {
+            if (state.tickId % 1 == 0) {
                 moveHead();
             }
 
@@ -112,6 +112,13 @@ class Engine {
     }
 
     private void moveHead() {
+        int moveEachTick = 5;
+        if (state.head.velocity>1) {
+            moveEachTick = 3;
+        }
+        if (state.tickId % moveEachTick != 0) {
+            return;
+        }
         // moving
         if (state.head.shift.x != 0 || state.head.shift.y != 0) {
             XY newPos = new XY(
@@ -146,7 +153,7 @@ class Engine {
 
         var bonuses = state.bonuses.stream().filter(b -> hasCollision(state.head, b.pos, b.size)).collect(Collectors.toList());
         bonuses.forEach(b -> {
-            state.lifes++;
+            b.type.consumer.accept(state);
         });
         state.bonuses.removeAll(bonuses);
 
