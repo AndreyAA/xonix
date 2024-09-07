@@ -211,7 +211,7 @@ public class XonixApp extends JFrame {
         if (itemType == ItemType.DESTROYER) {
             return Color.YELLOW;
         }
-        return type == ItemArea.InField ? Color.ORANGE : Color.RED;
+        return type == ItemArea.InField ? Color.WHITE : Color.RED;
     }
 
     private void highLightCell(Color color, int col, int row) {

@@ -12,6 +12,7 @@ import static com.ali.dev.xonix.Config.GRID_SIZE_Y;
 public class State {
 
     protected final List<Level> levels = List.of(
+            new Level(6, 2,0, 2, 1, 80),
             new Level(2, 2,0, 2, 1, 80),
             new Level(5, 0,1, 3, 1, 90),
             new Level(7, 0,2, 1,1, 95),
