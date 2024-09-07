@@ -20,7 +20,7 @@ public class XonixApp extends JFrame {
     private final Timer timer;
 
     public XonixApp() throws IOException {
-        setTitle("Grid App");
+        setTitle("Xonix");
         setSize(Config.WIDTH, Config.HEIGHT + 60); // Adjusted for the new panel position
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
