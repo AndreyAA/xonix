@@ -1,6 +1,6 @@
-package com.ali.dev.towers;
+package com.ali.dev.xonix;
 
-import com.ali.dev.towers.State.XY;
+import com.ali.dev.xonix.State.XY;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayDeque;
@@ -10,9 +10,9 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import static com.ali.dev.towers.Config.*;
-import static com.ali.dev.towers.XonixApp.calcX;
-import static com.ali.dev.towers.XonixApp.calcY;
+import static com.ali.dev.xonix.Config.*;
+import static com.ali.dev.xonix.XonixApp.calcX;
+import static com.ali.dev.xonix.XonixApp.calcY;
 
 class Engine {
     private final State state;

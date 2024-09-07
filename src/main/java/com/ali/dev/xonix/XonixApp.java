@@ -1,4 +1,4 @@
-package com.ali.dev.towers;
+package com.ali.dev.xonix;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import static com.ali.dev.towers.Config.*;
+import static com.ali.dev.xonix.Config.*;
 
 public class XonixApp extends JFrame {
     private final KeyboardInput keyboard = new KeyboardInput();

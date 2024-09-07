@@ -1,10 +1,10 @@
-package com.ali.dev.towers;
+package com.ali.dev.xonix;
 
 import java.awt.event.MouseEvent;
 import java.util.*;
 
-import static com.ali.dev.towers.Config.GRID_SIZE_X;
-import static com.ali.dev.towers.Config.GRID_SIZE_Y;
+import static com.ali.dev.xonix.Config.GRID_SIZE_X;
+import static com.ali.dev.xonix.Config.GRID_SIZE_Y;
 
 public class State {
 

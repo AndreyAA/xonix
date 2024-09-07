@@ -1,9 +1,9 @@
-package com.ali.dev.towers;
+package com.ali.dev.xonix;
 
-import com.ali.dev.towers.State.XY;
+import com.ali.dev.xonix.State.XY;
 
-import static com.ali.dev.towers.Config.*;
-import static com.ali.dev.towers.XonixApp.*;
+import static com.ali.dev.xonix.Config.*;
+import static com.ali.dev.xonix.XonixApp.*;
 
 enum ItemType {
     InField, OutFiled

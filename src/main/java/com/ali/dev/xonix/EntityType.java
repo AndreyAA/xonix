@@ -1,4 +1,4 @@
-package com.ali.dev.towers;
+package com.ali.dev.xonix;
 
 enum EntityType {
     FREE(false), BORDER(true);

@@ -1,11 +1,11 @@
-package com.ali.dev.towers;
+package com.ali.dev.xonix;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.ali.dev.towers.Config.BUTTON_DELAY_MS;
+import static com.ali.dev.xonix.Config.BUTTON_DELAY_MS;
 
 public class KeyboardInput implements KeyListener {
 
