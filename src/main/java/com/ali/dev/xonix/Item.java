@@ -15,6 +15,7 @@ class Item {
     double currentX, currentY;
     XY shift;
     double velocity;
+    double prevVelocity;
 
     Item(XY pos, XY shift, ItemType type, double velocity) {
         this.pos = pos;
@@ -23,6 +24,19 @@ class Item {
         this.shift = shift;
         this.type = type;
         this.velocity = velocity;
+        this.prevVelocity = velocity;
+    }
+
+    public void slowDown() {
+        if (velocity>=prevVelocity) {
+            this.prevVelocity = velocity;
+            velocity = Math.max(1, velocity / 2);
+        }
+    }
+    public void restore() {
+        if (prevVelocity>velocity) {
+            this.velocity = prevVelocity;
+        }
     }
 
     void move(State state) {

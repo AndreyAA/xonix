@@ -9,6 +9,7 @@ import java.io.IOException;
 public class Images {
     public static final Image bonusLife = loadImage("hart20.png");
     public static final Image speedUp = loadImage("speedup.png");
+    public static final Image freeze = loadImage("freeze20.png");
 
     private static BufferedImage loadImage(String image) {
         try {

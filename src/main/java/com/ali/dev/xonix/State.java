@@ -38,7 +38,7 @@ public class State {
     EntityType[][] checkingBusy;
     Head head = new Head();
     // items
-    List<Item> items = new ArrayList<>();
+    protected List<Item> items = new ArrayList<>();
     List<Bonus> bonuses = new ArrayList<>();
     List<Bonus> activeBonuses = new ArrayList<>();
     double progress;
@@ -185,16 +185,19 @@ public class State {
 
     enum BonusType {
         LIFE(s -> s.lifes++, s-> {}, Images.bonusLife, false),
-        HEAD_SPEED(s -> s.head.velocity = 2, s -> s.head.velocity = 1, Images.speedUp, true);
+        HEAD_SPEED(s -> s.head.velocity = 2, s -> s.head.velocity = 1, Images.speedUp, true),
+        FREEZE(s -> s.items.stream().filter(i->i.type==ItemType.InField).forEach(Item::slowDown),
+                s -> s.items.stream().filter(i->i.type==ItemType.InField).forEach(Item::restore),
+                Images.freeze, true);
 
         final Consumer<State> apply;
-        final Consumer<State> rejecter;
+        final Consumer<State> regect;
         final Image image;
         final boolean durable;
 
-        BonusType(Consumer<State> apply, Consumer<State> rejecter, Image image, boolean durable) {
+        BonusType(Consumer<State> apply, Consumer<State> regect, Image image, boolean durable) {
             this.apply = apply;
-            this.rejecter = rejecter;
+            this.regect = regect;
             this.image = image;
             this.durable = durable;
         }
