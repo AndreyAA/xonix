@@ -1,5 +1,7 @@
 package com.ali.dev.xonix;
 
+import org.w3c.dom.css.Rect;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -12,11 +14,12 @@ import static com.ali.dev.xonix.Config.GRID_SIZE_Y;
 public class State {
 
     protected final List<Level> levels = List.of(
-            new Level(6, 2,0, 2, 1, 80),
-            new Level(2, 2,0, 2, 1, 80),
-            new Level(5, 0,1, 3, 1, 90),
-            new Level(7, 0,2, 1,1, 95),
-            new Level(10, 0, 4, 3, 1, 97)
+            new Level(6, 2,0, 2, 1, 80,
+                    List.of(new Rect(300, 300, 200, 200))),
+            new Level(2, 2,0, 2, 1, 80, List.of()),
+            new Level(5, 0,1, 3, 1, 90, List.of()),
+            new Level(7, 0,2, 1,1, 95, List.of()),
+            new Level(10, 0, 4, 3, 1, 97, List.of())
     );
     private final ScoreCalculator scoreCalculator = new ScoreCalculator();
     protected int waveWaitTimeMs = 5000;
@@ -138,6 +141,10 @@ public class State {
 
     void markBorder(int i, int x, boolean x1, EntityType border) {
         entityGrid[i][x] = border;
+    }
+
+    public boolean inSliders(int x, int y) {
+        return getCurLevel().sliders.stream().anyMatch(sl->sl.contains(x,y));
     }
 
     public void initData() {
@@ -287,8 +294,11 @@ public class State {
         double velocityInField;
         double velocityOutField;
         double levelThreshold;
+        List<Rect> sliders;
 
-        public Level(int itemInField, int itemInFieldDestroyers, int itemOutField, double velocityInField, double velocityOutField, double levelThreshold) {
+        public Level(int itemInField, int itemInFieldDestroyers, int itemOutField,
+                     double velocityInField, double velocityOutField,
+                     double levelThreshold, List<Rect> sliders) {
             this.itemInField = itemInField;
             this.itemInFieldDestroyers = itemInFieldDestroyers;
             if (itemInField<itemInFieldDestroyers) {
@@ -298,6 +308,7 @@ public class State {
             this.velocityInField = velocityInField;
             this.velocityOutField = velocityOutField;
             this.levelThreshold = levelThreshold;
+            this.sliders = sliders;
         }
     }
 
@@ -306,6 +317,27 @@ public class State {
         BonusType type;
         XY size;
         long lastTick;
+    }
+
+
+
+    public static class Rect {
+        final int x;
+        final int y;
+        final int width;
+        final int height;
+
+        public Rect(int x, int y, int width, int height) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+        }
+
+        public boolean contains(int x0, int y0) {
+            return (x0>=x && x0<=x+width && y0>=y && y0<=y+height);
+        }
+
     }
 
 }

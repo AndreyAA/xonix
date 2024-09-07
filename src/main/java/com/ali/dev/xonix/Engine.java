@@ -52,7 +52,12 @@ class Engine {
                 return;
             }
         } else {
-            updateKeys();
+            int x = calcX(state.head.pos.x);
+            int y = calcY(state.head.pos.y);
+
+            if (!state.inSliders(x, y)) {
+                updateKeys();
+            }
         }
 
         if (isActive(TickAction.MouseEvent)) {

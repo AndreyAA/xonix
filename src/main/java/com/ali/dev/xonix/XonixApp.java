@@ -69,7 +69,7 @@ public class XonixApp extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                engine.tick();
+                SwingUtilities.invokeLater(()->engine.tick());
                 repaint();
             }
         });
@@ -198,6 +198,11 @@ public class XonixApp extends JFrame {
             String mes = "Next Level: ";
             bufferGraphics.drawString(mes + (state.curLevel+2), Config.WIDTH / 2 - mes.length()*bufferGraphics.getFont().getSize()/3, Config.HEIGHT / 2);
         }
+
+        bufferGraphics.setColor(Color.cyan);
+        state.getCurLevel().sliders.forEach(sl -> {
+            bufferGraphics.drawRect(sl.x, sl.y, sl.width, sl.height);
+        });
 
         // Draw the buffer on the screen
         g.drawImage(buffer, 0, 0, this);
