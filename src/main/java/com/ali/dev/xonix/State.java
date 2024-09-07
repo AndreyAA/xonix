@@ -9,10 +9,10 @@ import static com.ali.dev.xonix.Config.GRID_SIZE_Y;
 public class State {
 
     protected final List<Level> levels = List.of(
-            new Level(1, 0, 2, 40),
-            new Level(5, 1, 3, 90),
-            new Level(7, 2, 1, 95),
-            new Level(10, 4, 1, 97)
+            new Level(10, 4, 3, 1, 97),
+            new Level(1, 0, 2, 1, 40),
+            new Level(5, 1, 3, 1, 90),
+            new Level(7, 2, 1,1, 95)
     );
     private final ScoreCalculator scoreCalculator = new ScoreCalculator();
     protected int waveWaitTimeMs = 5000;
@@ -163,7 +163,7 @@ public class State {
             int d = rnd.nextInt(4);
             XY dir = XY.DIRECTIONS[d];
             Item item = new Item(new XY(rnd.nextInt(GRID_SIZE_X), GRID_SIZE_Y - 1), new XY(dir.x, dir.y),
-                    ItemType.OutFiled, getCurLevel().velocityInField);
+                    ItemType.OutFiled, getCurLevel().velocityOutField);
             items.add(item);
         }
         head.init();
@@ -255,12 +255,14 @@ public class State {
         int itemInField;
         int itemOutField;
         double velocityInField;
+        double velocityOutField;
         double levelThreshold;
 
-        public Level(int itemInField, int itemOutField, double velocityInField, double levelThreshold) {
+        public Level(int itemInField, int itemOutField, double velocityInField, double velocityOutField, double levelThreshold) {
             this.itemInField = itemInField;
             this.itemOutField = itemOutField;
             this.velocityInField = velocityInField;
+            this.velocityOutField = velocityOutField;
             this.levelThreshold = levelThreshold;
         }
     }
