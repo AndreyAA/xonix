@@ -114,6 +114,7 @@ public class State {
         head.curPath.clear();
         head.pos = (head.startPoint != null) ? head.startPoint : new XY(GRID_SIZE_X / 2, 0);
         head.shift = XY.STOP;
+        activeBonuses.clear();
         lifes--;
     }
 
