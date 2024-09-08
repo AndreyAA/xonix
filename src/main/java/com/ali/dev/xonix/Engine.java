@@ -162,30 +162,26 @@ class Engine {
             }
         }
 
-        XY emptyPoint = processGrid(itemsSet, state.checkingBusy);
-        if (emptyPoint != null) {
-            //System.out.println("empty point: " + emptyPoint);
-            isEmptyArea(itemsSet, state.entityGrid, emptyPoint, (y, x) -> {
-                state.entityGrid[y][x] = EntityType.BLOCK;
-            });
-        }
-
+        processGrid(itemsSet, state.checkingBusy);
         state.updateProgress();
     }
 
-    private XY processGrid(HashSet<Object> itemsSet, EntityType[][] busy) {
+    private void processGrid(HashSet<Object> itemsSet, EntityType[][] busy) {
         XY startPoint;
         while ((startPoint = findFirstFreePoint(busy)) != null) {
             System.out.println("check area from point: " + startPoint);
             if (isEmptyArea(itemsSet, busy, startPoint, (y, x) -> {
             })) {
                 System.out.println("empty area");
-                return startPoint;
+                // fill in by blocks
+                isEmptyArea(itemsSet, state.entityGrid, startPoint, (y, x) -> {
+                    state.entityGrid[y][x] = EntityType.BLOCK;
+                });
+                // continue to find next empty area
             } else {
                 System.out.println("not empty area");
             }
         }
-        return null;
     }
 
     private boolean isEmptyArea(HashSet<Object> itemsSet, EntityType[][] busy, XY startPoint, BiConsumer<Integer, Integer> consumer) {
