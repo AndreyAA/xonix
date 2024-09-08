@@ -13,7 +13,12 @@ public class State {
 
     protected final List<Level> levels = List.of(
             new Level(6, 2,0, 2, 1, 80,
-                    List.of(new Rect(300, 300, 200, 200))),
+                    List.of(
+                            new Rect(300, 300, 200, 200),
+                            new Rect(800, 600, 200, 200)
+                    )
+
+            ),
             new Level(2, 2,0, 2, 1, 80, List.of()),
             new Level(5, 0,1, 3, 1, 90, List.of()),
             new Level(7, 0,2, 1,1, 95, List.of()),

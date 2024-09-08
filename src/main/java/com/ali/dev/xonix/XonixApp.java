@@ -17,6 +17,15 @@ public class XonixApp extends JFrame {
     private final Engine engine;
     private final Timer timer;
 
+    private final float[] dashPattern = {10, 5}; // 10 пикселей линия, 5 пикселей пробел
+    private final BasicStroke dashedStroke = new BasicStroke(
+            1,                      // Толщина линии
+            BasicStroke.CAP_BUTT,   // Завершение линии
+            BasicStroke.JOIN_BEVEL, // Соединение линий
+            10.0f,                  // Мягкость соединения
+            dashPattern,            // Шаблон прерывистой линии
+            0.0f);                  // Смещение
+
     public XonixApp() throws IOException {
         setTitle("Xonix");
         setSize(Config.WIDTH, Config.HEIGHT + 60); // Adjusted for the new panel position
@@ -201,6 +210,8 @@ public class XonixApp extends JFrame {
 
         bufferGraphics.setColor(Color.cyan);
         state.getCurLevel().sliders.forEach(sl -> {
+            // Устанавливаем стиль линии
+            bufferGraphics.setStroke(dashedStroke);
             bufferGraphics.drawRect(sl.x, sl.y, sl.width, sl.height);
         });
 
