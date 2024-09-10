@@ -65,7 +65,7 @@ class Engine {
             }
         }
 
-        if (isActive(TickAction.ItemMoving)) {
+        if (isActive(TickAction.ItemMoving) && !state.gameOver) {
             //hide bonuses
             state.bonuses.removeIf(b -> b.lastTick < state.tickId);
             state.activeBonuses.stream()
@@ -254,21 +254,6 @@ class Engine {
         } else {
             state.head.shift = XY.STOP;
         }
-
-      /*  if (keyboard.isPressed(KeyEvent.VK_O)) {
-            state.isDebug = !state.isDebug;
-            System.out.println("debug: " + state.isDebug);
-        }
-
-        if (state.isDebug && keyboard.isPressed(KeyEvent.VK_S)) {
-            System.out.println("serialize state");
-            Serializator.serialize(state);
-        }
-
-        if (state.isDebug && keyboard.isPressed(KeyEvent.VK_G)) {
-            System.out.println("add money");
-            state.money+=500;
-        }*/
     }
 
     private void gameOverEvent() {

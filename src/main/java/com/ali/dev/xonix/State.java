@@ -2,6 +2,10 @@ package com.ali.dev.xonix;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
@@ -57,10 +61,9 @@ public class State {
     boolean enterName;
     List<State.Score> topScores;
 
-    public State(EventListener eventListener, EntityType[][] entityTypes, List<Score> topScores) {
+    public State(EventListener eventListener, EntityType[][] entityTypes) {
         this.eventListener = eventListener;
-        entityGrid = entityTypes; // todo copy
-        this.topScores = topScores;
+        entityGrid = entityTypes;
     }
 
     public void updateProgress() {
@@ -211,6 +214,22 @@ public class State {
         topScores.add(new Score(name, score));
         topScores = topScores.stream().sorted(Comparator.comparing(Score::getScore).reversed())
                 .limit(7).collect(Collectors.toList());
+    }
+
+    public void storeScores() throws IOException {
+        String data = topScores.stream()
+                .map(s -> s.getName() + ";" + s.getScore())
+                .collect(Collectors.joining("\n"));
+
+        Files.write(Paths.get("./scores.txt"), data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void readScores() throws IOException {
+        this.topScores = Files.readAllLines(Paths.get("./scores.txt"))
+                .stream().map(str->str.split(";"))
+                .map(strArr->new State.Score(strArr[0], Integer.parseInt(strArr[1])))
+                .sorted(Comparator.comparing(State.Score::getScore).reversed())
+                .collect(Collectors.toList());
     }
 
 

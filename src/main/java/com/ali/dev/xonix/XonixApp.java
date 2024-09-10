@@ -42,14 +42,9 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         setSize(Config.WIDTH, Config.HEIGHT + 60); // Adjusted for the new panel position
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-//        this.state = Serializator.load("towersStateProd");
-        List<State.Score> topScores = Files.readAllLines(Paths.get("./scores.txt"))
-                .stream().map(str->str.split(";"))
-                .map(strArr->new State.Score(strArr[0], Integer.parseInt(strArr[1])))
-                .sorted(Comparator.comparing(State.Score::getScore).reversed())
-                .collect(Collectors.toList());
 
-        state = new State(null, new EntityType[GRID_SIZE_Y][GRID_SIZE_X], topScores);
+        state = new State(null, new EntityType[GRID_SIZE_Y][GRID_SIZE_X]);
+        state.readScores();
         state.initData();
         buffer = new BufferedImage(Config.WIDTH, Config.HEIGHT + 60, BufferedImage.TYPE_INT_RGB);
         bufferGraphics = buffer.createGraphics();
@@ -100,6 +95,11 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
                             state.addScore(nameInput.substring(YOU_NAME.length()));
                             nameInput.delete(0, nameInput.length());
                             state.enterName = false;
+                            try {
+                                state.storeScores();
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
                         }
                     } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && nameInput.length() > YOU_NAME.length()) {
                         nameInput.deleteCharAt(nameInput.length() - 1);
@@ -109,6 +109,7 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
                         state.gameOver = false;
                         state.enterName = false;
                         state.lifes = INIT_LIFES;
+                        // open the same level
                         state.curLevel--;
                         state.nextLevel();
                     }
