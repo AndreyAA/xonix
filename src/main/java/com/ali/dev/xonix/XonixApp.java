@@ -16,17 +16,7 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
     private final State state;
     private final Engine engine;
     private final Timer timer;
-
     private final StringBuilder nameInput = new StringBuilder().append(YOU_NAME);
-
-    private final float[] dashPattern = {10, 5}; // 10 пикселей линия, 5 пикселей пробел
-    private final BasicStroke dashedStroke = new BasicStroke(
-            1,                      // Толщина линии
-            BasicStroke.CAP_BUTT,   // Завершение линии
-            BasicStroke.JOIN_BEVEL, // Соединение линий
-            10.0f,                  // Мягкость соединения
-            dashPattern,            // Шаблон прерывистой линии
-            0.0f);                  // Смещение
 
     public XonixApp() throws IOException {
         setTitle("Xonix");
@@ -34,35 +24,69 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        state = new State(null, new EntityType[GRID_SIZE_Y][GRID_SIZE_X]);
+        state = new State(new EntityType[GRID_SIZE_Y][GRID_SIZE_X]);
         state.readScores();
         state.initData();
+
         buffer = new BufferedImage(Config.WIDTH, Config.HEIGHT + 60, BufferedImage.TYPE_INT_RGB);
         bufferGraphics = buffer.createGraphics();
         bufferGraphics.setBackground(CLEAR_COLOR);
 
         engine = new Engine(state, keyboard, this);
-        addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                state.mouseX = e.getX();
-                state.mouseY = e.getY();
-                state.highlightedRow = (e.getY() - MIN_Y) / CELL_SIZE;
-                state.highlightedCol = (e.getX() - MIN_X) / CELL_SIZE;
-                repaint();
-            }
-        });
 
-        addMouseListener(new MouseAdapter() {
+        startKeyboardThread();
+        addKeyListener(keyboard);
+
+        addKeyListener(new KeyAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    state.mouseEvent = e;
-                } else if (e.getButton() == MouseEvent.BUTTON3) {
-                    state.mouseEvent2 = e;
+            public void keyPressed(KeyEvent e) {
+                if (state.gameOver) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        processEnterName();
+                    } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && nameInput.length() > YOU_NAME.length()) {
+                        nameInput.deleteCharAt(nameInput.length() - 1);
+                    } else if (e.getKeyChar() != KeyEvent.CHAR_UNDEFINED && Character.isLetterOrDigit(e.getKeyChar())) {
+                        nameInput.append(e.getKeyChar());
+                    } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                        processEscapeKey();
+                    }
                 }
             }
         });
+
+        timer = new Timer(Config.TICK_TIME_MS, e -> {
+            SwingUtilities.invokeLater(engine::tick);
+            repaint();
+        });
+        timer.start();
+
+        setFocusable(true);
+        requestFocus();
+    }
+
+    private void processEscapeKey() {
+        state.gameOver = false;
+        state.enterName = false;
+        state.lifes = INIT_LIFES;
+        // open the same level
+        state.curLevel--;
+        state.nextLevel();
+    }
+
+    private void processEnterName() {
+        if (nameInput.length() > YOU_NAME.length() + 3) {
+            state.addScore(nameInput.substring(YOU_NAME.length()));
+            nameInput.delete(0, nameInput.length());
+            state.enterName = false;
+            try {
+                state.storeScores();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
+    private void startKeyboardThread() {
         Runnable keyboardThread = () -> {
             while (true) {
                 keyboard.poll();
@@ -74,74 +98,11 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
             }
         };
         new Thread(keyboardThread).start();
-
-        addKeyListener(keyboard);
-
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (state.gameOver) {
-                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        if (nameInput.length() > YOU_NAME.length() + 3) {
-                            state.addScore(nameInput.substring(YOU_NAME.length()));
-                            nameInput.delete(0, nameInput.length());
-                            state.enterName = false;
-                            try {
-                                state.storeScores();
-                            } catch (IOException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        }
-                    } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && nameInput.length() > YOU_NAME.length()) {
-                        nameInput.deleteCharAt(nameInput.length() - 1);
-                    } else if (e.getKeyChar() != KeyEvent.CHAR_UNDEFINED && Character.isLetterOrDigit(e.getKeyChar())) {
-                        nameInput.append(e.getKeyChar());
-                    } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                        state.gameOver = false;
-                        state.enterName = false;
-                        state.lifes = INIT_LIFES;
-                        // open the same level
-                        state.curLevel--;
-                        state.nextLevel();
-                    }
-                }
-            }
-        });
-
-        timer = new Timer(Config.TICK_TIME_MS, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SwingUtilities.invokeLater(() -> engine.tick());
-                repaint();
-            }
-        });
-        timer.start();
-
-        setFocusable(true);
-        requestFocus();
-
     }
 
 
-    private static void paintRectSize(Graphics2D g2d, int x, int y, int size) {
-        g2d.fillRect(x, y, CELL_SIZE * size, CELL_SIZE * size);
-    }
-
-    private static void paintRect(Graphics2D g2d, int x, int y, int character) {
-        paintRect(g2d, x, y, character, CELL_SIZE - 4);
-    }
-
-    private static void paintRect(Graphics2D g2d, int x, int y, int character, int height) {
-
-        g2d.fillRect(x + 2, y + 2, CELL_SIZE - 4, height);
-        if (character > 0) {
-            Color c = g2d.getColor();
-            g2d.setColor(Color.BLACK);
-            g2d.setFont(CELL_FONT);
-            g2d.drawString(Character.toString(character), x + CELL_SIZE / 4, y + 3 * CELL_SIZE / 4);
-            g2d.setColor(c);
-        }
+    private static void paintRect(Graphics2D g2d, int x, int y) {
+        g2d.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
     }
 
     public static void main(String[] args) {
@@ -168,23 +129,14 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         return (int) ((y - MIN_Y) / CELL_SIZE);
     }
 
-    public static int calcCenterX(int col) {
-        return col * CELL_SIZE + MIN_X + HALF_CELL;
-    }
-
     public static int calcY(int row) {
         return row * CELL_SIZE + MIN_Y;
-    }
-
-    public static int calcCenterY(int row) {
-        return row * CELL_SIZE + MIN_Y + HALF_CELL;
     }
 
     @Override
     public void paint(Graphics g) {
         long start = System.currentTimeMillis();
         // Clear the buffer
-//        bufferGraphics.setBackground(new Color(0, 0, 0, 0));
         bufferGraphics.clearRect(0, 0, Config.WIDTH, Config.HEIGHT + 120);
 
         // Draw the grid
@@ -194,27 +146,14 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
                     bufferGraphics.setColor(Color.WHITE);
                     drawShape(bufferGraphics, row, col, state.entityGrid[row][col]);
                 }
-                //highLightCell(Color.GRAY, col, row);
             }
         }
 
-
-        //draw highlight for button
-        // highLightCell(Color.YELLOW, GRID_SIZE_X / 2 + state.activeButton, GRID_SIZE_Y);
-
-
-        // Draw the start and end points
-        bufferGraphics.setColor(Color.BLUE);
         state.bonuses.forEach(b -> {
             bufferGraphics.drawImage(b.type.image, calcX(b.pos.x), calcY(b.pos.y), null);
         });
 
-
-/*        bufferGraphics.setColor(Color.RED);
-        paintRect(bufferGraphics, calcX(state.endCol), calcY(state.endRow), 0);*/
-
         // Draw the items
-
         for (Item item : state.items) {
             bufferGraphics.setColor(calcColor(item.area, item.type));
             bufferGraphics.fillOval((int) item.currentX + CELL_SIZE / 4, (int) item.currentY + CELL_SIZE / 4, 3 * CELL_SIZE / 4, 3 * CELL_SIZE / 4);
@@ -223,12 +162,7 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         // Draw the highlighted cell
         highLightCell(Color.YELLOW, state.head.pos.x, state.head.pos.y);
 
-        // Draw the score
-
         printStatus();
-//        printWaitWave();
-        // active buttons
-//        printActiveButtons();
 
         if (state.isPause) {
             bufferGraphics.setColor(Color.WHITE);
@@ -245,7 +179,7 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         bufferGraphics.setColor(Color.cyan);
         state.getCurLevel().sliders.forEach(sl -> {
             // Устанавливаем стиль линии
-            bufferGraphics.setStroke(dashedStroke);
+            bufferGraphics.setStroke(DASHED_STROKE);
             bufferGraphics.drawRect(sl.x, sl.y, sl.width, sl.height);
         });
 
@@ -284,9 +218,6 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
 
             bufferGraphics.setColor(Color.YELLOW);
             bufferGraphics.drawString(nameInput.toString(), inputX, yOffset);
-/*            if (cursorVisible) {
-                bufferGraphics.drawString("|", inputX + bufferGraphics.getFontMetrics().stringWidth(nameInput.toString()), inputY);
-            }*/
         }
     }
 
@@ -324,11 +255,11 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         switch (entityType) {
             case BORDER:
                 g2d.setColor(Color.DARK_GRAY);
-                paintRect(g2d, x, y, 0);
+                paintRect(g2d, x, y);
                 break;
             case BLOCK:
                 g2d.setColor(Color.GRAY);
-                paintRect(g2d, x, y, 0);
+                paintRect(g2d, x, y);
                 break;
         }
     }

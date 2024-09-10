@@ -1,7 +1,6 @@
 package com.ali.dev.xonix;
 
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -11,8 +10,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static com.ali.dev.xonix.Config.GRID_SIZE_X;
-import static com.ali.dev.xonix.Config.GRID_SIZE_Y;
+import static com.ali.dev.xonix.Config.*;
 
 public class State {
 
@@ -31,23 +29,16 @@ public class State {
     );
     private final ScoreCalculator scoreCalculator = new ScoreCalculator();
 
-    protected int waveWaitTimeMs = 5000;
-    protected EntityType[][] entityGrid;
-    protected long tickId = 0;
-    protected long nextLevelTick = 0;
-    protected int mouseX = -1;
-    protected int mouseY = -1;
-    protected int highlightedRow = -1;
-    protected int highlightedCol = -1;
-    protected int score = 0;
-    protected int lifes = 3;
-    protected int breakItems = 3;
-    protected volatile boolean isPause;
-    protected volatile boolean isDebug;
-    protected EventListener eventListener;
-    protected int curLevel;
-    protected volatile MouseEvent mouseEvent;
-    protected volatile MouseEvent mouseEvent2;
+
+    EntityType[][] entityGrid;
+    long tickId = 0;
+    long nextLevelTick = 0;
+    int score = 0;
+    int lifes = 3;
+    boolean isPause;
+    boolean isDebug;
+    int curLevel;
+
     // items
     protected List<Item> items = new ArrayList<>();
     EntityType[][] checkingBusy;
@@ -62,8 +53,7 @@ public class State {
     boolean enterName;
     List<State.Score> topScores;
 
-    public State(EventListener eventListener, EntityType[][] entityTypes) {
-        this.eventListener = eventListener;
+    public State(EntityType[][] entityTypes) {
         entityGrid = entityTypes;
     }
 
@@ -75,7 +65,7 @@ public class State {
 
         if (progress * 100.0 >= getCurLevel().levelThreshold) {
             isReadyForNewLevel = true;
-            nextLevelTick = tickId + waveWaitTimeMs / Config.TICK_TIME_MS;
+            nextLevelTick = tickId + NEXT_LEVEL_WAIT_MS / Config.TICK_TIME_MS;
         }
     }
 
