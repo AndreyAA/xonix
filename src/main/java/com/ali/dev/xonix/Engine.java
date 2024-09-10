@@ -82,10 +82,10 @@ class Engine {
                 state.bonuses.add(b);
             }
 
-                // one tick - move 1 pixel
-                moveHead();
-                moveItems();
-                state.progress = state.calcProgressLight(state.busyCells);
+            // one tick - move 1 pixel
+            moveHead();
+            moveItems();
+            state.progress = state.calcProgressLight(state.busyCells);
         }
 
         int tickTime = (int) (System.currentTimeMillis() - start);
@@ -96,7 +96,7 @@ class Engine {
 
     private void moveHead() {
         int moveEachTick = 5;
-        if (state.head.velocity>1) {
+        if (state.head.velocity > 1) {
             moveEachTick = 3;
         }
         if (state.tickId % moveEachTick != 0) {
@@ -138,7 +138,7 @@ class Engine {
         bonuses.forEach(b -> {
             b.type.apply.accept(state);
             if (b.type.durable) {
-                b.lastTick = state.tickId + 10000/TICK_TIME_MS;
+                b.lastTick = state.tickId + 10000 / TICK_TIME_MS;
                 state.activeBonuses.add(b);
             }
         });
@@ -162,9 +162,7 @@ class Engine {
         state.items.stream().filter(i -> i.area == ItemArea.InField).forEach(i -> itemsSet.add(new XY(i.pos.x, i.pos.y)));
         // copy busy arr todo use the same array
         for (int i = 0; i < state.entityGrid.length; i++) {
-            for (int j = 0; j < state.entityGrid[0].length; j++) {
-                state.checkingBusy[i][j] = state.entityGrid[i][j];
-            }
+            System.arraycopy(state.entityGrid[i], 0, state.checkingBusy[i], 0, state.entityGrid[0].length);
         }
 
         processGrid(itemsSet, state.checkingBusy);
@@ -262,8 +260,6 @@ class Engine {
         state.enterName = minScore < state.score;
         listener.onGameOver();
     }
-
-
 
     private void moveItems() {
         for (Item item : state.items) {

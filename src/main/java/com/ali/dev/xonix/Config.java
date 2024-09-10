@@ -3,10 +3,9 @@ package com.ali.dev.xonix;
 import java.awt.*;
 
 public class Config {
+    static final int TIME_FOR_BONUS_MS = 5000;
+    static final int BONUS_LIVE_MS = 10000;
     static final int TICK_TIME_MS = 16;
-    public static  final int TIME_FOR_BONUS_MS = 5000;
-    public static  final int BONUS_LIVE_MS = 10000;
-
     static final int INIT_LIFES = 3;
     static final int GRID_SIZE_X = 108;
     static final int GRID_SIZE_Y = 80;

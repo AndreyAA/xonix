@@ -6,26 +6,27 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static com.ali.dev.xonix.Config.*;
+import static com.ali.dev.xonix.Config.GRID_SIZE_X;
+import static com.ali.dev.xonix.Config.GRID_SIZE_Y;
 
 public class State {
 
     protected final List<Level> levels = List.of(
-            new Level(6, 2,0, 3, 1, 80,
+            new Level(6, 2, 0, 3, 1, 80,
                     List.of(
                             new Rect(300, 300, 200, 200),
                             new Rect(800, 600, 200, 200)
                     )
 
             ),
-            new Level(2, 2,0, 2, 1, 80, List.of()),
-            new Level(5, 0,1, 3, 1, 90, List.of()),
-            new Level(7, 0,2, 1,1, 95, List.of()),
+            new Level(2, 2, 0, 2, 1, 80, List.of()),
+            new Level(5, 0, 1, 3, 1, 90, List.of()),
+            new Level(7, 0, 2, 1, 1, 95, List.of()),
             new Level(10, 0, 4, 3, 1, 97, List.of())
     );
     private final ScoreCalculator scoreCalculator = new ScoreCalculator();
@@ -47,10 +48,10 @@ public class State {
     protected int curLevel;
     protected volatile MouseEvent mouseEvent;
     protected volatile MouseEvent mouseEvent2;
-    EntityType[][] checkingBusy;
-    Head head = new Head();
     // items
     protected List<Item> items = new ArrayList<>();
+    EntityType[][] checkingBusy;
+    Head head = new Head();
     List<Bonus> bonuses = new ArrayList<>();
     List<Bonus> activeBonuses = new ArrayList<>();
     double progress;
@@ -70,7 +71,7 @@ public class State {
         double newProgress = calcProgress();
         int deltaScore = scoreCalculator.calcScore(progress, newProgress, this);
         progress = newProgress;
-        score+=deltaScore;
+        score += deltaScore;
 
         if (progress * 100.0 >= getCurLevel().levelThreshold) {
             isReadyForNewLevel = true;
@@ -163,7 +164,7 @@ public class State {
     }
 
     public boolean inSliders(int x, int y) {
-        return getCurLevel().sliders.stream().anyMatch(sl->sl.contains(x,y));
+        return getCurLevel().sliders.stream().anyMatch(sl -> sl.contains(x, y));
     }
 
     public void initData() {
@@ -183,7 +184,7 @@ public class State {
         Random rnd = new Random();
         for (int i = 0; i < n; i++) {
             ItemType itemType = ItemType.STD;
-            if (destroyers>0 && i<destroyers) {
+            if (destroyers > 0 && i < destroyers) {
                 itemType = ItemType.DESTROYER;
             }
             int x = rnd.nextInt(width) + 2;
@@ -226,18 +227,19 @@ public class State {
 
     public void readScores() throws IOException {
         this.topScores = Files.readAllLines(Paths.get("./scores.txt"))
-                .stream().map(str->str.split(";"))
-                .map(strArr->new State.Score(strArr[0], Integer.parseInt(strArr[1])))
+                .stream().map(str -> str.split(";"))
+                .map(strArr -> new State.Score(strArr[0], Integer.parseInt(strArr[1])))
                 .sorted(Comparator.comparing(State.Score::getScore).reversed())
                 .collect(Collectors.toList());
     }
 
 
     enum BonusType {
-        LIFE(s -> s.lifes++, s-> {}, Images.bonusLife, false),
+        LIFE(s -> s.lifes++, s -> {
+        }, Images.bonusLife, false),
         HEAD_SPEED(s -> s.head.velocity = 2, s -> s.head.velocity = 1, Images.speedUp, true),
-        FREEZE(s -> s.items.stream().filter(i->i.area == ItemArea.InField).forEach(Item::slowDown),
-                s -> s.items.stream().filter(i->i.area == ItemArea.InField).forEach(Item::restore),
+        FREEZE(s -> s.items.stream().filter(i -> i.area == ItemArea.InField).forEach(Item::slowDown),
+                s -> s.items.stream().filter(i -> i.area == ItemArea.InField).forEach(Item::restore),
                 Images.freeze, true);
 
         final Consumer<State> apply;
@@ -337,7 +339,7 @@ public class State {
                      double levelThreshold, List<Rect> sliders) {
             this.itemInField = itemInField;
             this.itemInFieldDestroyers = itemInFieldDestroyers;
-            if (itemInField<itemInFieldDestroyers) {
+            if (itemInField < itemInFieldDestroyers) {
                 throw new IllegalArgumentException("itemInFieldDestroyers");
             }
             this.itemOutField = itemOutField;
@@ -356,7 +358,6 @@ public class State {
     }
 
 
-
     public static class Rect {
         final int x;
         final int y;
@@ -371,7 +372,7 @@ public class State {
         }
 
         public boolean contains(int x0, int y0) {
-            return (x0>=x && x0<=x+width && y0>=y && y0<=y+height);
+            return (x0 >= x && x0 <= x + width && y0 >= y && y0 <= y + height);
         }
 
     }

@@ -1,19 +1,10 @@
 package com.ali.dev.xonix;
 
 import javax.swing.*;
-import java.awt.Graphics2D;
-import java.awt.BasicStroke;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.ali.dev.xonix.Config.*;
 
@@ -114,13 +105,14 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
                         state.nextLevel();
                     }
                 }
-            }});
+            }
+        });
 
         timer = new Timer(Config.TICK_TIME_MS, new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                SwingUtilities.invokeLater(()->engine.tick());
+                SwingUtilities.invokeLater(() -> engine.tick());
                 repaint();
             }
         });
@@ -247,7 +239,7 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
             bufferGraphics.setColor(Color.WHITE);
             bufferGraphics.setFont(TIMER_FONT);
             String mes = "Next Level: ";
-            bufferGraphics.drawString(mes + (state.curLevel+2), Config.WIDTH / 2 - mes.length()*bufferGraphics.getFont().getSize()/3, Config.HEIGHT / 2);
+            bufferGraphics.drawString(mes + (state.curLevel + 2), Config.WIDTH / 2 - mes.length() * bufferGraphics.getFont().getSize() / 3, Config.HEIGHT / 2);
         }
 
         bufferGraphics.setColor(Color.cyan);
@@ -288,8 +280,6 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         }
 
 
-
-
         if (state.enterName) {
 
             bufferGraphics.setColor(Color.YELLOW);
@@ -321,8 +311,8 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         bufferGraphics.drawString("Target: " +
                 String.format("%6.2f", state.getCurLevel().levelThreshold), 650, 60);
 
-        state.activeBonuses.forEach(b->{
-            bufferGraphics.drawImage(b.type.image, calcX(GRID_SIZE_X-5 + b.type.ordinal()), calcY(0)-2*CELL_SIZE, null);
+        state.activeBonuses.forEach(b -> {
+            bufferGraphics.drawImage(b.type.image, calcX(GRID_SIZE_X - 5 + b.type.ordinal()), calcY(0) - 2 * CELL_SIZE, null);
         });
     }
 
