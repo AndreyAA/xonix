@@ -1,7 +1,5 @@
 package com.ali.dev.xonix;
 
-import com.ali.dev.xonix.State.XY;
-
 import static com.ali.dev.xonix.Config.*;
 import static com.ali.dev.xonix.XonixApp.*;
 

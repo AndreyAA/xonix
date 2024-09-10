@@ -1,7 +1,5 @@
 package com.ali.dev.xonix;
 
-import com.ali.dev.xonix.State.XY;
-
 import java.awt.event.KeyEvent;
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -74,9 +72,9 @@ class Engine {
             state.activeBonuses.removeIf(b -> b.lastTick < state.tickId);
 
             if (state.tickId % (TIME_FOR_BONUS_MS / TICK_TIME_MS) == 0) {
-                var b = new State.Bonus();
+                var b = new Bonus();
                 b.pos = new XY(random.nextInt(GRID_SIZE_X - 2), random.nextInt(GRID_SIZE_Y - 2));
-                b.type = State.BonusType.values()[random.nextInt(State.BonusType.values().length)];
+                b.type = BonusType.values()[random.nextInt(BonusType.values().length)];
                 b.size = new XY(2, 2);
                 b.lastTick = state.tickId + BONUS_LIVE_MS / TICK_TIME_MS;
                 state.bonuses.add(b);
@@ -146,7 +144,7 @@ class Engine {
 
     }
 
-    private boolean hasCollision(State.Head item, XY targetPos, XY size) {
+    private boolean hasCollision(Head item, XY targetPos, XY size) {
         return (calcX(item.pos.x) + CELL_SIZE > calcX(targetPos.x) && calcX(item.pos.x) < calcX(targetPos.x) + size.x * CELL_SIZE)
                 &&
                 (calcY(item.pos.y) + CELL_SIZE > calcY(targetPos.y) && calcY(item.pos.y) < calcY(targetPos.y) + size.y * CELL_SIZE);
@@ -256,7 +254,7 @@ class Engine {
 
     private void gameOverEvent() {
         state.gameOver = true;
-        int minScore = state.topScores.stream().mapToInt(State.Score::getScore).min().orElse(0);
+        int minScore = state.topScores.stream().mapToInt(Score::getScore).min().orElse(0);
         state.enterName = minScore < state.score;
         listener.onGameOver();
     }

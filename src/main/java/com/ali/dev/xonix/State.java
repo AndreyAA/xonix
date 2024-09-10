@@ -1,13 +1,11 @@
 package com.ali.dev.xonix;
 
-import java.awt.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.ali.dev.xonix.Config.*;
@@ -51,7 +49,7 @@ public class State {
     int busyCells;
     boolean gameOver;
     boolean enterName;
-    List<State.Score> topScores;
+    List<Score> topScores;
 
     public State(EntityType[][] entityTypes) {
         entityGrid = entityTypes;
@@ -218,179 +216,10 @@ public class State {
     public void readScores() throws IOException {
         this.topScores = Files.readAllLines(Paths.get("./scores.txt"))
                 .stream().map(str -> str.split(";"))
-                .map(strArr -> new State.Score(strArr[0], Integer.parseInt(strArr[1])))
-                .sorted(Comparator.comparing(State.Score::getScore).reversed())
+                .map(strArr -> new Score(strArr[0], Integer.parseInt(strArr[1])))
+                .sorted(Comparator.comparing(Score::getScore).reversed())
                 .collect(Collectors.toList());
     }
 
-
-    enum BonusType {
-        LIFE(s -> s.lifes++, s -> {
-        }, Images.bonusLife, false),
-        HEAD_SPEED(s -> s.head.velocity = 2, s -> s.head.velocity = 1, Images.speedUp, true),
-        FREEZE(s -> s.items.stream().filter(i -> i.area == ItemArea.InField).forEach(Item::slowDown),
-                s -> s.items.stream().filter(i -> i.area == ItemArea.InField).forEach(Item::restore),
-                Images.freeze, true);
-
-        final Consumer<State> apply;
-        final Consumer<State> regect;
-        final Image image;
-        final boolean durable;
-
-        BonusType(Consumer<State> apply, Consumer<State> regect, Image image, boolean durable) {
-            this.apply = apply;
-            this.regect = regect;
-            this.image = image;
-            this.durable = durable;
-        }
-    }
-
-    public static class Head {
-        // head
-        XY pos;
-        XY shift;
-        Set<XY> curPath;
-        XY startPoint;
-        int velocity;
-
-        public void init() {
-            pos = new XY(GRID_SIZE_X / 2, 1);
-            shift = new XY(0, 0);
-            curPath = new HashSet<>();
-            startPoint = null;
-            velocity = 1;
-        }
-    }
-
-    public static class XY {
-        public static final XY TOP = new XY(0, -1);
-        public static final XY DOWN = new XY(0, 1);
-        public static final XY LEFT = new XY(-1, 0);
-        public static final XY RIGHT = new XY(1, 0);
-        public static final XY STOP = new XY(0, 0);
-
-
-        public static final XY[] DIRECTIONS = new XY[]{
-                new XY(1, 1),
-                new XY(-1, -1),
-                new XY(1, -1),
-                new XY(-1, 1),
-        };
-
-        final int x;
-        final int y;
-
-        public XY(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public XY copy() {
-            return new XY(x, y);
-        }
-
-        public XY createMove(int dx, int dy) {
-            return new XY(x + dx, y + dy);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            XY xy = (XY) o;
-            return x == xy.x && y == xy.y;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y);
-        }
-
-        @Override
-        public String toString() {
-            return "XY{" +
-                    "x=" + x +
-                    ", y=" + y +
-                    '}';
-        }
-    }
-
-    public static class Level {
-        int itemInField;
-        int itemInFieldDestroyers;
-        int itemOutField;
-        double velocityInField;
-        double velocityOutField;
-        double levelThreshold;
-        List<Rect> sliders;
-
-        public Level(int itemInField, int itemInFieldDestroyers, int itemOutField,
-                     double velocityInField, double velocityOutField,
-                     double levelThreshold, List<Rect> sliders) {
-            this.itemInField = itemInField;
-            this.itemInFieldDestroyers = itemInFieldDestroyers;
-            if (itemInField < itemInFieldDestroyers) {
-                throw new IllegalArgumentException("itemInFieldDestroyers");
-            }
-            this.itemOutField = itemOutField;
-            this.velocityInField = velocityInField;
-            this.velocityOutField = velocityOutField;
-            this.levelThreshold = levelThreshold;
-            this.sliders = sliders;
-        }
-    }
-
-    public static class Bonus {
-        XY pos;
-        BonusType type;
-        XY size;
-        long lastTick;
-    }
-
-
-    public static class Rect {
-        final int x;
-        final int y;
-        final int width;
-        final int height;
-
-        public Rect(int x, int y, int width, int height) {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-
-        public boolean contains(int x0, int y0) {
-            return (x0 >= x && x0 <= x + width && y0 >= y && y0 <= y + height);
-        }
-
-    }
-
-    public static class Score {
-        private final String name;
-        private final int score;
-
-        public Score(String name, int score) {
-            this.name = name;
-            this.score = score;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getScore() {
-            return score;
-        }
-
-        @Override
-        public String toString() {
-            return "Score{" +
-                    "name='" + name + '\'' +
-                    ", score=" + score +
-                    '}';
-        }
-    }
 
 }
