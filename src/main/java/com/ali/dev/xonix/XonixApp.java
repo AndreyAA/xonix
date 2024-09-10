@@ -221,11 +221,11 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         }
     }
 
-    private Color calcColor(ItemArea type, ItemType itemType) {
+    private Color calcColor(ItemAreaType type, ItemType itemType) {
         if (itemType == ItemType.DESTROYER) {
             return Color.YELLOW;
         }
-        return type == ItemArea.InField ? Color.WHITE : Color.RED;
+        return type == ItemAreaType.InField ? Color.WHITE : Color.RED;
     }
 
     private void highLightCell(Color color, int col, int row) {

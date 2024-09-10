@@ -157,7 +157,7 @@ class Engine {
 
 
         var itemsSet = new HashSet<>();
-        state.items.stream().filter(i -> i.area == ItemArea.InField).forEach(i -> itemsSet.add(new XY(i.pos.x, i.pos.y)));
+        state.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(i -> itemsSet.add(new XY(i.pos.x, i.pos.y)));
         // copy busy arr todo use the same array
         for (int i = 0; i < state.entityGrid.length; i++) {
             System.arraycopy(state.entityGrid[i], 0, state.checkingBusy[i], 0, state.entityGrid[0].length);

@@ -3,16 +3,8 @@ package com.ali.dev.xonix;
 import static com.ali.dev.xonix.Config.*;
 import static com.ali.dev.xonix.XonixApp.*;
 
-enum ItemArea {
-    InField, OutFiled
-}
-
-enum ItemType {
-    STD, DESTROYER
-}
-
 class Item {
-    final ItemArea area;
+    final ItemAreaType area;
     final ItemType type;
     XY pos;
     double currentX, currentY;
@@ -20,7 +12,7 @@ class Item {
     double velocity;
     double prevVelocity;
 
-    Item(XY pos, XY shift, ItemType type, ItemArea area, double velocity) {
+    Item(XY pos, XY shift, ItemType type, ItemAreaType area, double velocity) {
         this.pos = pos;
         this.currentX = calcX(pos.x);
         this.currentY = calcY(pos.y);
@@ -57,7 +49,7 @@ class Item {
             return;
         }
 
-        if (area == ItemArea.OutFiled) {
+        if (area == ItemAreaType.OutFiled) {
             if (newY <= MIN_Y - HALF_CELL || newRow <= -1 || newRow >= state.entityGrid.length || !state.entityGrid[newRow][curCol].isBusy) {
                 // Отражение от горизонтали
                 shift = new XY(shift.x, -1 * shift.y);

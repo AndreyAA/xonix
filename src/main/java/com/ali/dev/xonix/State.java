@@ -180,7 +180,7 @@ public class State {
             int d = rnd.nextInt(4);
             XY dir = XY.DIRECTIONS[d];
             Item item = new Item(new XY(x, y), new XY(dir.x, dir.y), itemType,
-                    ItemArea.InField, getCurLevel().velocityInField);
+                    ItemAreaType.InField, getCurLevel().velocityInField);
             items.add(item);
         }
 
@@ -189,7 +189,7 @@ public class State {
             int d = rnd.nextInt(4);
             XY dir = XY.DIRECTIONS[d];
             Item item = new Item(new XY(rnd.nextInt(GRID_SIZE_X), GRID_SIZE_Y - 1), new XY(dir.x, dir.y),
-                    ItemType.STD, ItemArea.OutFiled, getCurLevel().velocityOutField);
+                    ItemType.STD, ItemAreaType.OutFiled, getCurLevel().velocityOutField);
             items.add(item);
         }
         head.init();
