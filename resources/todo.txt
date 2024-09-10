@@ -1,1 +1,2 @@
-- можно перекрыть один из входов, не должно такого быть
+- splash screen
+- level configuration
