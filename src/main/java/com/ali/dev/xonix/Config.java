@@ -7,6 +7,7 @@ public class Config {
     public static  final int TIME_FOR_BONUS_MS = 5000;
     public static  final int BONUS_LIVE_MS = 10000;
 
+    static final int INIT_LIFES = 3;
     static final int GRID_SIZE_X = 108;
     static final int GRID_SIZE_Y = 80;
     static final int CELL_SIZE = 10;
@@ -21,4 +22,6 @@ public class Config {
     static final Font TIMER_FONT = new Font("Monospaced", Font.PLAIN, 100);
     static final Color CLEAR_COLOR = Color.BLACK;
     static final Color STATUS_COLOR = Color.WHITE;
+
+    static final String YOU_NAME = "Your name: ";
 }

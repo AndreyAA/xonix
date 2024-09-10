@@ -1,14 +1,23 @@
 package com.ali.dev.xonix;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Color;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.ali.dev.xonix.Config.*;
 
-public class XonixApp extends JFrame {
+public class XonixApp extends JFrame implements Engine.GameOverListener {
 
     private final KeyboardInput keyboard = new KeyboardInput();
     private final BufferedImage buffer;
@@ -16,6 +25,8 @@ public class XonixApp extends JFrame {
     private final State state;
     private final Engine engine;
     private final Timer timer;
+
+    private final StringBuilder nameInput = new StringBuilder().append(YOU_NAME);
 
     private final float[] dashPattern = {10, 5}; // 10 пикселей линия, 5 пикселей пробел
     private final BasicStroke dashedStroke = new BasicStroke(
@@ -32,13 +43,19 @@ public class XonixApp extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 //        this.state = Serializator.load("towersStateProd");
-        state = new State(null, new EntityType[GRID_SIZE_Y][GRID_SIZE_X]);
+        List<State.Score> topScores = Files.readAllLines(Paths.get("./scores.txt"))
+                .stream().map(str->str.split(";"))
+                .map(strArr->new State.Score(strArr[0], Integer.parseInt(strArr[1])))
+                .sorted(Comparator.comparing(State.Score::getScore).reversed())
+                .collect(Collectors.toList());
+
+        state = new State(null, new EntityType[GRID_SIZE_Y][GRID_SIZE_X], topScores);
         state.initData();
         buffer = new BufferedImage(Config.WIDTH, Config.HEIGHT + 60, BufferedImage.TYPE_INT_RGB);
         bufferGraphics = buffer.createGraphics();
         bufferGraphics.setBackground(CLEAR_COLOR);
 
-        engine = new Engine(state, keyboard);
+        engine = new Engine(state, keyboard, this);
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -73,6 +90,30 @@ public class XonixApp extends JFrame {
         new Thread(keyboardThread).start();
 
         addKeyListener(keyboard);
+
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (state.gameOver) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        if (nameInput.length() > YOU_NAME.length() + 3) {
+                            state.addScore(nameInput.substring(YOU_NAME.length()));
+                            nameInput.delete(0, nameInput.length());
+                            state.enterName = false;
+                        }
+                    } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && nameInput.length() > YOU_NAME.length()) {
+                        nameInput.deleteCharAt(nameInput.length() - 1);
+                    } else if (e.getKeyChar() != KeyEvent.CHAR_UNDEFINED && Character.isLetterOrDigit(e.getKeyChar())) {
+                        nameInput.append(e.getKeyChar());
+                    } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                        state.gameOver = false;
+                        state.enterName = false;
+                        state.lifes = INIT_LIFES;
+                        state.curLevel--;
+                        state.nextLevel();
+                    }
+                }
+            }});
 
         timer = new Timer(Config.TICK_TIME_MS, new ActionListener() {
 
@@ -215,11 +256,46 @@ public class XonixApp extends JFrame {
             bufferGraphics.drawRect(sl.x, sl.y, sl.width, sl.height);
         });
 
+        if (state.gameOver) {
+            paintGameOverArea(bufferGraphics);
+        }
+
         // Draw the buffer on the screen
         g.drawImage(buffer, 0, 0, this);
         int timePaint = (int) (System.currentTimeMillis() - start);
         if (timePaint > 10) {
             System.out.println("time paint: " + timePaint + " ms");
+        }
+    }
+
+    private void paintGameOverArea(Graphics2D bufferGraphics) {
+        // Рисуем сообщение "Game Over" и таблицу игроков
+        bufferGraphics.setColor(Color.BLACK);
+
+        bufferGraphics.fillRect(200, 200, Config.WIDTH - 400, 500);
+        bufferGraphics.setColor(Color.WHITE);
+        bufferGraphics.setFont(new Font("Arial", Font.BOLD, 48));
+        bufferGraphics.drawString("Game Over", 400, 200);
+
+        bufferGraphics.setFont(new Font("Arial", Font.PLAIN, 24));
+        int yOffset = 300;
+        int inputX = 450;
+        for (int i = 0; i < state.topScores.size(); i++) {
+            var score = state.topScores.get(i);
+            bufferGraphics.drawString((i + 1) + ". " + score.getName() + ": " + score.getScore(), inputX, yOffset);
+            yOffset += 40;
+        }
+
+
+
+
+        if (state.enterName) {
+
+            bufferGraphics.setColor(Color.YELLOW);
+            bufferGraphics.drawString(nameInput.toString(), inputX, yOffset);
+/*            if (cursorVisible) {
+                bufferGraphics.drawString("|", inputX + bufferGraphics.getFontMetrics().stringWidth(nameInput.toString()), inputY);
+            }*/
         }
     }
 
@@ -239,9 +315,7 @@ public class XonixApp extends JFrame {
         bufferGraphics.setFont(STATUS_FONT);
         bufferGraphics.setColor(STATUS_COLOR);
         bufferGraphics.drawString("Lifes: " + state.lifes, 20, 60);
-        bufferGraphics.drawString("Remain: " + state.breakItems, 120, 60);
-//        bufferGraphics.drawString("Money: " + state.money, 240, 60);
-        bufferGraphics.drawString("Score: " + state.score, 240, 60);
+        bufferGraphics.drawString("Score: " + state.score, 120, 60);
         bufferGraphics.drawString("Progress: " + String.format("%6.2f", state.progress * 100), 450, 60);
         bufferGraphics.drawString("Target: " +
                 String.format("%6.2f", state.getCurLevel().levelThreshold), 650, 60);
@@ -268,4 +342,10 @@ public class XonixApp extends JFrame {
         }
     }
 
+    @Override
+    public void onGameOver() {
+        // restore
+        nameInput.delete(0, nameInput.length());
+        nameInput.append(YOU_NAME);
+    }
 }

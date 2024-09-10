@@ -18,11 +18,12 @@ class Engine {
     private final State state;
     private final KeyboardInput keyboard;
     private final Random random = new Random();
+    private final GameOverListener listener;
 
-    public Engine(State state, KeyboardInput keyboard) {
+    public Engine(State state, KeyboardInput keyboard, GameOverListener listener) {
         this.state = state;
         this.keyboard = keyboard;
-        state.initNewWave();
+        this.listener = listener;
     }
 
     public static int calcCol(int x) {
@@ -38,6 +39,10 @@ class Engine {
 
         if (keyboard.isPressedOnce(KeyEvent.VK_P)) {
             state.isPause = !state.isPause;
+        }
+
+        if (state.lifes <= 0 && !state.gameOver) {
+            gameOverEvent();
         }
 
         if (!state.isPause && !state.isDebug) {
@@ -266,6 +271,13 @@ class Engine {
         }*/
     }
 
+    private void gameOverEvent() {
+        state.gameOver = true;
+        int minScore = state.topScores.stream().mapToInt(State.Score::getScore).min().orElse(0);
+        state.enterName = minScore < state.score;
+        listener.onGameOver();
+    }
+
 
 
     private void moveItems() {
@@ -289,5 +301,9 @@ class Engine {
     enum TickAction {
         MouseEvent,
         ItemMoving
+    }
+
+    public interface GameOverListener {
+        void onGameOver();
     }
 }

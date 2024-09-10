@@ -5,14 +5,14 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-import static com.ali.dev.xonix.Config.GRID_SIZE_X;
-import static com.ali.dev.xonix.Config.GRID_SIZE_Y;
+import static com.ali.dev.xonix.Config.*;
 
 public class State {
 
     protected final List<Level> levels = List.of(
-            new Level(6, 2,0, 2, 1, 80,
+            new Level(6, 2,0, 3, 1, 80,
                     List.of(
                             new Rect(300, 300, 200, 200),
                             new Rect(800, 600, 200, 200)
@@ -25,6 +25,7 @@ public class State {
             new Level(10, 0, 4, 3, 1, 97, List.of())
     );
     private final ScoreCalculator scoreCalculator = new ScoreCalculator();
+
     protected int waveWaitTimeMs = 5000;
     protected EntityType[][] entityGrid;
     protected long tickId = 0;
@@ -52,10 +53,14 @@ public class State {
     boolean isReadyForNewLevel;
     int initBusyCells;
     int busyCells;
+    boolean gameOver;
+    boolean enterName;
+    List<State.Score> topScores;
 
-    public State(EventListener eventListener, EntityType[][] entityTypes) {
+    public State(EventListener eventListener, EntityType[][] entityTypes, List<Score> topScores) {
         this.eventListener = eventListener;
         entityGrid = entityTypes; // todo copy
+        this.topScores = topScores;
     }
 
     public void updateProgress() {
@@ -121,6 +126,7 @@ public class State {
     public void nextLevel() {
         System.out.println("init new level");
         items.clear();
+        activeBonuses.clear();
         curLevel++;
         isReadyForNewLevel = false;
         entityGrid = new EntityType[GRID_SIZE_Y][GRID_SIZE_X];
@@ -199,11 +205,12 @@ public class State {
         initBusyCells = calcBusyCells();
         updateProgress();
         score = 0;
-
     }
 
-    public void initNewWave() {
-        System.out.println("init new wave in tick: " + tickId);
+    public void addScore(String name) {
+        topScores.add(new Score(name, score));
+        topScores = topScores.stream().sorted(Comparator.comparing(Score::getScore).reversed())
+                .limit(7).collect(Collectors.toList());
     }
 
 
@@ -348,6 +355,32 @@ public class State {
             return (x0>=x && x0<=x+width && y0>=y && y0<=y+height);
         }
 
+    }
+
+    public static class Score {
+        private final String name;
+        private final int score;
+
+        public Score(String name, int score) {
+            this.name = name;
+            this.score = score;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getScore() {
+            return score;
+        }
+
+        @Override
+        public String toString() {
+            return "Score{" +
+                    "name='" + name + '\'' +
+                    ", score=" + score +
+                    '}';
+        }
     }
 
 }
