@@ -68,7 +68,7 @@ class Engine {
             state.bonuses.removeIf(b -> b.lastTick < state.tickId);
             state.activeBonuses.stream()
                     .filter(b -> b.lastTick < state.tickId)
-                    .forEach(b -> b.type.regect.accept(state));
+                    .forEach(b -> b.type.reject.accept(state));
             state.activeBonuses.removeIf(b -> b.lastTick < state.tickId);
 
             if (state.tickId % (TIME_FOR_BONUS_MS / TICK_TIME_MS) == 0) {

@@ -6,7 +6,6 @@ import java.util.Set;
 import static com.ali.dev.xonix.Config.GRID_SIZE_X;
 
 public class Head {
-    // head
     XY pos;
     XY shift;
     Set<XY> curPath;

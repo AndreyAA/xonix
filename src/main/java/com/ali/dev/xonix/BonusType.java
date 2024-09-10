@@ -12,13 +12,13 @@ enum BonusType {
             Images.freeze, true);
 
     final Consumer<State> apply;
-    final Consumer<State> regect;
+    final Consumer<State> reject;
     final Image image;
     final boolean durable;
 
-    BonusType(Consumer<State> apply, Consumer<State> regect, Image image, boolean durable) {
+    BonusType(Consumer<State> apply, Consumer<State> reject, Image image, boolean durable) {
         this.apply = apply;
-        this.regect = regect;
+        this.reject = reject;
         this.image = image;
         this.durable = durable;
     }

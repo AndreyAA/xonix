@@ -18,7 +18,6 @@ public class Config {
     static final int MIN_X = 15;
     static final int BUTTON_DELAY_MS = 500;
     static final Font STATUS_FONT = new Font("Monospaced", Font.PLAIN, 16);
-    static final Font CELL_FONT = new Font("Monospaced", Font.PLAIN, 30);
     static final Font TIMER_FONT = new Font("Monospaced", Font.PLAIN, 100);
     static final Color CLEAR_COLOR = Color.BLACK;
     static final Color STATUS_COLOR = Color.WHITE;
