@@ -3,6 +3,7 @@ package com.ali.dev.xonix;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
@@ -214,7 +215,17 @@ public class State {
     }
 
     public void readScores() throws IOException {
-        this.topScores = Files.readAllLines(Paths.get("./scores.txt"))
+        Path path = Paths.get("scores.txt");
+
+        if (!Files.exists(path)) {
+            Files.createFile(path);
+            Files.write(path, List.of("***;0", "***;0", "***;0", "***;0", "***;0", "***;0", "***;0"));
+        }
+        this.topScores = readScoreFile(path);
+    }
+
+    private static List<Score> readScoreFile(Path path) throws IOException {
+        return Files.readAllLines(path)
                 .stream().map(str -> str.split(";"))
                 .map(strArr -> new Score(strArr[0], Integer.parseInt(strArr[1])))
                 .sorted(Comparator.comparing(Score::getScore).reversed())

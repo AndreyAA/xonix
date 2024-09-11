@@ -1,2 +1,2 @@
-- splash screen
++ splash screen
 - level configuration
