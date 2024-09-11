@@ -13,19 +13,7 @@ import static com.ali.dev.xonix.Config.*;
 
 public class State {
 
-    protected final List<Level> levels = List.of(
-            new Level(6, 2, 0, 3, 1, 80,
-                    List.of(
-                            new Rect(300, 300, 200, 200),
-                            new Rect(800, 600, 200, 200)
-                    )
-
-            ),
-            new Level(2, 2, 0, 2, 1, 80, List.of()),
-            new Level(5, 0, 1, 3, 1, 90, List.of()),
-            new Level(7, 0, 2, 1, 1, 95, List.of()),
-            new Level(10, 0, 4, 3, 1, 97, List.of())
-    );
+    protected final List<Level> levels;
     private final ScoreCalculator scoreCalculator = new ScoreCalculator();
 
 
@@ -52,8 +40,9 @@ public class State {
     boolean enterName;
     List<Score> topScores;
 
-    public State(EntityType[][] entityTypes) {
+    public State(EntityType[][] entityTypes, List<Level> levels) {
         entityGrid = entityTypes;
+        this.levels = levels;
     }
 
     public void updateProgress() {

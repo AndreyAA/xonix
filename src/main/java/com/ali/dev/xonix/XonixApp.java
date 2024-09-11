@@ -1,10 +1,15 @@
 package com.ali.dev.xonix;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 
 import static com.ali.dev.xonix.Config.*;
 
@@ -24,7 +29,9 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        state = new State(new EntityType[GRID_SIZE_Y][GRID_SIZE_X]);
+        java.util.List<Level> levels = readLevels("levels.json");
+
+        state = new State(new EntityType[GRID_SIZE_Y][GRID_SIZE_X], levels);
         state.readScores();
         state.initData();
 
@@ -62,6 +69,23 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
 
         setFocusable(true);
         requestFocus();
+    }
+
+    private java.util.List<Level> readLevels(String path) throws IOException {
+        ClassLoader classLoader = Images.class.getClassLoader();
+
+        // Get the resource as an InputStream
+        InputStream inputStream = classLoader.getResourceAsStream(path);
+
+        if (inputStream == null) {
+            throw new IllegalArgumentException("Image not found: " + path);
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        java.util.List<Level> levels = objectMapper.readValue(inputStream,
+                objectMapper.getTypeFactory().constructCollectionType(java.util.List.class, Level.class));
+        System.out.println("read levels: " + levels.size());
+        return levels;
     }
 
     private void processEscapeKey() {

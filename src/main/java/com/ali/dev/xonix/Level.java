@@ -11,6 +11,9 @@ public class Level {
     double levelThreshold;
     List<Rect> sliders;
 
+    public Level() {
+    }
+
     public Level(int itemInField, int itemInFieldDestroyers, int itemOutField,
                  double velocityInField, double velocityOutField,
                  double levelThreshold, List<Rect> sliders) {
@@ -24,5 +27,34 @@ public class Level {
         this.velocityOutField = velocityOutField;
         this.levelThreshold = levelThreshold;
         this.sliders = sliders;
+    }
+
+    // Getters
+    public int getItemInField() {
+        return itemInField;
+    }
+
+    public int getItemInFieldDestroyers() {
+        return itemInFieldDestroyers;
+    }
+
+    public int getItemOutField() {
+        return itemOutField;
+    }
+
+    public double getVelocityInField() {
+        return velocityInField;
+    }
+
+    public double getVelocityOutField() {
+        return velocityOutField;
+    }
+
+    public double getLevelThreshold() {
+        return levelThreshold;
+    }
+
+    public List<Rect> getSliders() {
+        return sliders;
     }
 }
