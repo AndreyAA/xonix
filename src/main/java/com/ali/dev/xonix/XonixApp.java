@@ -286,7 +286,7 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                ImageIcon icon = new ImageIcon("resources/images/xonix.png");
+                ImageIcon icon = new ImageIcon(Images.splash);
                 g.drawImage(icon.getImage(), 0, 0, getWidth(), getHeight(), this);
             }
         };
