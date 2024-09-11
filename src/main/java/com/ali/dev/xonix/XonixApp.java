@@ -9,7 +9,7 @@ import java.io.IOException;
 import static com.ali.dev.xonix.Config.*;
 
 public class XonixApp extends JFrame implements Engine.GameOverListener {
-
+    private static JFrame splashFrame;
     private final KeyboardInput keyboard = new KeyboardInput();
     private final BufferedImage buffer;
     private final Graphics2D bufferGraphics;
@@ -105,7 +105,12 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         g2d.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+
+        createSplashScreen();
+        Thread.sleep(3000);
+        splashFrame.dispose();
+
         SwingUtilities.invokeLater(() -> {
             XonixApp app = null;
             try {
@@ -269,5 +274,24 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         // restore
         nameInput.delete(0, nameInput.length());
         nameInput.append(YOU_NAME);
+    }
+
+    private static void createSplashScreen() {
+        splashFrame = new JFrame();
+        splashFrame.setUndecorated(true);
+        splashFrame.setSize(400, 300);
+        splashFrame.setLocationRelativeTo(null);
+
+        JPanel splashPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                ImageIcon icon = new ImageIcon("resources/images/xonix.png");
+                g.drawImage(icon.getImage(), 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
+        splashFrame.add(splashPanel);
+        splashFrame.setVisible(true);
     }
 }
