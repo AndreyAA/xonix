@@ -40,7 +40,7 @@ public class Engine {
     public void tick() {
         long start = System.currentTimeMillis();
 
-        if (keyboard.isPressedOnce(KeyEvent.VK_P)) {
+        if (keyboard.isPressedOnce(KeyEvent.VK_SPACE)) {
             state.isPause = !state.isPause;
         }
 
