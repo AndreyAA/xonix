@@ -89,7 +89,7 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
     }
 
     private void processEnterName() {
-        if (nameInput.length() >= YOU_NAME.length() + 3) {
+        if (nameInput.length() >= YOU_NAME.length() + NAME_MIN_LENGTH) {
             state.addScore(nameInput.substring(YOU_NAME.length()));
             nameInput.delete(0, nameInput.length());
             state.enterName = false;
