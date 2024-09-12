@@ -1,7 +1,11 @@
 package com.ali.dev.xonix;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.util.StatusPrinter;
 import com.ali.dev.xonix.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,6 +16,7 @@ import java.io.*;
 import static com.ali.dev.xonix.Config.*;
 
 public class XonixApp extends JFrame implements GameOverListener {
+    private static final Logger log = LoggerFactory.getLogger(XonixApp.class);
     private static JFrame splashFrame;
     private final KeyboardInput keyboard = new KeyboardInput();
     private final BufferedImage buffer;
@@ -76,7 +81,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         ObjectMapper objectMapper = new ObjectMapper();
         java.util.List<Level> levels = objectMapper.readValue(inputStream,
                 objectMapper.getTypeFactory().constructCollectionType(java.util.List.class, Level.class));
-        System.out.println("read levels: " + levels.size());
+        log.info("read levels: {}", levels.size());
         return levels;
     }
 
@@ -120,6 +125,11 @@ public class XonixApp extends JFrame implements GameOverListener {
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
+/*
+        // add log status info
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        StatusPrinter.print(lc);*/
+        log.debug("start");
         InputStream inputStream = getLevelsInputStream(args);
         java.util.List<Level> levels;
         try {
@@ -149,7 +159,7 @@ public class XonixApp extends JFrame implements GameOverListener {
             File file = new File(args[0]);
 //            levelsPath=System.getProperty("user.dir") + "/" + args[0];
             inputStream = new FileInputStream(file);
-            System.out.println("load levels file:" + args[0]);
+            log.info("load levels from file: {}", args[0]);
         } else {
             ClassLoader classLoader = Images.class.getClassLoader();
             // Get the resource as an InputStream
@@ -232,7 +242,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         g.drawImage(buffer, 0, 0, this);
         int timePaint = (int) (System.currentTimeMillis() - start);
         if (timePaint > 10) {
-            System.out.println("time paint: " + timePaint + " ms");
+            log.debug("time paint: {} ms", timePaint);
         }
     }
 

@@ -1,6 +1,8 @@
 package com.ali.dev.xonix.model;
 
 import com.ali.dev.xonix.KeyboardInput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayDeque;
@@ -15,6 +17,7 @@ import static com.ali.dev.xonix.XonixApp.calcX;
 import static com.ali.dev.xonix.XonixApp.calcY;
 
 public class Engine {
+    private static final Logger log = LoggerFactory.getLogger(Engine.class);
     private final State state;
     private final KeyboardInput keyboard;
     private final Random random = new Random();
@@ -90,7 +93,7 @@ public class Engine {
 
         int tickTime = (int) (System.currentTimeMillis() - start);
         if (tickTime > 16) {
-            System.out.println("tick time: " + tickTime + " ms");
+            log.warn("tick time: {} ms", tickTime);
         }
     }
 
@@ -118,7 +121,7 @@ public class Engine {
                 if (state.entityGrid[newPos.y][newPos.x].isBusy) {
                     //вернулись назад
                     state.head.curPath.clear();
-                    System.out.println("end moving");
+                    log.debug("end moving: {}", state.head.pos);
                     updateState();
                 } else {
                     // продолжаем движение
@@ -126,7 +129,7 @@ public class Engine {
                     state.markBorder(newPos.y, newPos.x, true, EntityType.BLOCK);
                 }
             } else if (!state.entityGrid[newPos.y][newPos.x].isBusy) {
-                System.out.println("start moving");
+                log.debug("start moving: {}", state.head.pos);
                 state.head.startPoint = state.head.pos;
                 state.head.curPath.add(newPos);
                 state.markBorder(newPos.y, newPos.x, true, EntityType.BLOCK);
@@ -172,17 +175,17 @@ public class Engine {
     private void processGrid(HashSet<Object> itemsSet, EntityType[][] busy) {
         XY startPoint;
         while ((startPoint = findFirstFreePoint(busy)) != null) {
-            System.out.println("check area from point: " + startPoint);
+            log.debug("check area from point: {}", startPoint);
             if (isEmptyArea(itemsSet, busy, startPoint, (y, x) -> {
             })) {
-                System.out.println("empty area");
+                log.debug("empty area");
                 // fill in by blocks
                 isEmptyArea(itemsSet, state.entityGrid, startPoint, (y, x) -> {
                     state.entityGrid[y][x] = EntityType.BLOCK;
                 });
                 // continue to find next empty area
             } else {
-                System.out.println("not empty area");
+                log.debug("not empty area");
             }
         }
     }
@@ -203,7 +206,7 @@ public class Engine {
 
         if (foundItem) {
             // надо закрасить на основной доске
-            System.out.println("found item");
+            log.debug("found item");
             return false;
         } else {
             return true;
@@ -235,7 +238,7 @@ public class Engine {
         }
         boolean res = itemsSet.contains(new XY(newX, newY));
         if (res) {
-            System.out.println("found item: x:" + newX + ", y: " + newY);
+            log.trace("found item: x: {}, y: {}", newX, newY);
         }
         return res;
     }

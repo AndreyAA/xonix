@@ -2,6 +2,8 @@ package com.ali.dev.xonix.model;
 
 import com.ali.dev.xonix.Config;
 import com.ali.dev.xonix.ScoreCalculator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -15,7 +17,7 @@ import java.util.stream.Collectors;
 import static com.ali.dev.xonix.Config.*;
 
 public class State {
-
+    private static final Logger log = LoggerFactory.getLogger(State.class);
     protected final List<Level> levels;
     private final ScoreCalculator scoreCalculator = new ScoreCalculator();
 
@@ -133,7 +135,7 @@ public class State {
     }
 
     public void failHead() {
-        System.out.println("fail head");
+        log.debug("fail head");
         head.curPath.forEach(p -> {
             entityGrid[p.y][p.x] = EntityType.FREE;
         });
@@ -154,13 +156,13 @@ public class State {
     }
 
     public void thisLevel() {
-        System.out.println("init level: " + curLevel);
+        log.debug("init level: {}", curLevel);
         items.clear();
         activeBonuses.clear();
         isReadyForNewLevel = false;
         entityGrid = new EntityType[GRID_SIZE_Y][GRID_SIZE_X];
         initData();
-        System.out.println("level is ready");
+        log.debug("level is ready");
     }
 
     public void prepare() {
