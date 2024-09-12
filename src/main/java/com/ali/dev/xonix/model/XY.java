@@ -1,4 +1,4 @@
-package com.ali.dev.xonix;
+package com.ali.dev.xonix.model;
 
 import java.util.Objects;
 
@@ -52,5 +52,13 @@ public class XY {
                 "x=" + x +
                 ", y=" + y +
                 '}';
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getX() {
+        return x;
     }
 }

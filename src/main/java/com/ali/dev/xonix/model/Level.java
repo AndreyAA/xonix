@@ -1,4 +1,4 @@
-package com.ali.dev.xonix;
+package com.ali.dev.xonix.model;
 
 import java.util.List;
 

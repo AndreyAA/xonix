@@ -1,9 +1,9 @@
-package com.ali.dev.xonix;
+package com.ali.dev.xonix.model;
 
 import static com.ali.dev.xonix.Config.*;
 import static com.ali.dev.xonix.XonixApp.*;
 
-class Item {
+public class Item {
     final ItemAreaType area;
     final ItemType type;
     XY pos;
@@ -88,4 +88,35 @@ class Item {
         pos = new XY(calcCol(currentX + HALF_CELL), calcRow(currentY + HALF_CELL));
     }
 
+    public ItemAreaType getArea() {
+        return area;
+    }
+
+    public ItemType getType() {
+        return type;
+    }
+
+    public XY getPos() {
+        return pos;
+    }
+
+    public double getCurrentX() {
+        return currentX;
+    }
+
+    public double getCurrentY() {
+        return currentY;
+    }
+
+    public XY getShift() {
+        return shift;
+    }
+
+    public double getVelocity() {
+        return velocity;
+    }
+
+    public double getPrevVelocity() {
+        return prevVelocity;
+    }
 }

@@ -1,4 +1,6 @@
-package com.ali.dev.xonix;
+package com.ali.dev.xonix.model;
+
+import com.ali.dev.xonix.KeyboardInput;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayDeque;
@@ -12,7 +14,7 @@ import static com.ali.dev.xonix.Config.*;
 import static com.ali.dev.xonix.XonixApp.calcX;
 import static com.ali.dev.xonix.XonixApp.calcY;
 
-class Engine {
+public class Engine {
     private final State state;
     private final KeyboardInput keyboard;
     private final Random random = new Random();
@@ -39,7 +41,7 @@ class Engine {
             state.isPause = !state.isPause;
         }
 
-        if (state.lifes <= 0 && !state.gameOver) {
+        if (state.lifes <= 0 && !state.isGameOver) {
             gameOverEvent();
         }
 
@@ -63,7 +65,7 @@ class Engine {
             }
         }
 
-        if (isActive(TickAction.ItemMoving) && !state.gameOver) {
+        if (isActive(TickAction.ItemMoving) && !state.isGameOver) {
             //hide bonuses
             state.bonuses.removeIf(b -> b.lastTick < state.tickId);
             state.activeBonuses.stream()
@@ -253,7 +255,7 @@ class Engine {
     }
 
     private void gameOverEvent() {
-        state.gameOver = true;
+        state.isGameOver = true;
         int minScore = state.topScores.stream().mapToInt(Score::getScore).min().orElse(0);
         state.enterName = minScore < state.score;
         listener.onGameOver();
@@ -277,12 +279,4 @@ class Engine {
         return false;
     }
 
-    enum TickAction {
-        MouseEvent,
-        ItemMoving
-    }
-
-    public interface GameOverListener {
-        void onGameOver();
-    }
 }

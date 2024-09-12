@@ -24,7 +24,7 @@ public class KeyboardInput implements KeyListener {
         }
     }
 
-    boolean isPressedOnce(int code) {
+    public boolean isPressedOnce(int code) {
         if (keyDownOnce(code)
                 && System.currentTimeMillis() - lastPressedKey.getOrDefault(code, 0L) > BUTTON_DELAY_MS) {
             lastPressedKey.put(code, System.currentTimeMillis());

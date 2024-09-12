@@ -1,4 +1,4 @@
-package com.ali.dev.xonix;
+package com.ali.dev.xonix.model;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,5 +18,25 @@ public class Head {
         curPath = new HashSet<>();
         startPoint = null;
         velocity = 1;
+    }
+
+    public XY getPos() {
+        return pos;
+    }
+
+    public XY getShift() {
+        return shift;
+    }
+
+    public Set<XY> getCurPath() {
+        return curPath;
+    }
+
+    public XY getStartPoint() {
+        return startPoint;
+    }
+
+    public int getVelocity() {
+        return velocity;
     }
 }

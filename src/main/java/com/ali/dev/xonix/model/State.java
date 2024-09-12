@@ -1,4 +1,7 @@
-package com.ali.dev.xonix;
+package com.ali.dev.xonix.model;
+
+import com.ali.dev.xonix.Config;
+import com.ali.dev.xonix.ScoreCalculator;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -17,7 +20,7 @@ public class State {
     private final ScoreCalculator scoreCalculator = new ScoreCalculator();
 
 
-    EntityType[][] entityGrid;
+    public EntityType[][] entityGrid;
     long tickId = 0;
     long nextLevelTick = 0;
     int score = 0;
@@ -36,7 +39,7 @@ public class State {
     boolean isReadyForNewLevel;
     int initBusyCells;
     int busyCells;
-    boolean gameOver;
+    boolean isGameOver;
     boolean enterName;
     List<Score> topScores;
 
@@ -45,16 +48,52 @@ public class State {
         this.levels = levels;
     }
 
+    public void setLifes(int lifes) {
+        this.lifes = lifes;
+    }
+
+    public List<Score> getTopScores() {
+        return topScores;
+    }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
+    public Head getHead() {
+        return head;
+    }
+
+    public boolean isGameOver() {
+        return isGameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        isGameOver = gameOver;
+    }
+
     public void updateProgress() {
         double newProgress = calcProgress();
         int deltaScore = scoreCalculator.calcScore(progress, newProgress, this);
         progress = newProgress;
         score += deltaScore;
 
-        if (progress * 100.0 >= getCurLevel().levelThreshold) {
+        if (progress * 100.0 >= getCurLevel().getLevelThreshold()) {
             isReadyForNewLevel = true;
             nextLevelTick = tickId + NEXT_LEVEL_WAIT_MS / Config.TICK_TIME_MS;
         }
+    }
+
+    public List<Bonus> getActiveBonuses() {
+        return activeBonuses;
+    }
+
+    public List<Bonus> getBonuses() {
+        return bonuses;
+    }
+
+    public double getProgress() {
+        return progress;
     }
 
     private double calcProgress() {
@@ -106,14 +145,22 @@ public class State {
     }
 
     public void nextLevel() {
-        System.out.println("init new level");
+        curLevel++;
+        thisLevel();
+    }
+
+    public int getCurLevelNumber() {
+        return curLevel;
+    }
+
+    public void thisLevel() {
+        System.out.println("init level: " + curLevel);
         items.clear();
         activeBonuses.clear();
-        curLevel++;
         isReadyForNewLevel = false;
         entityGrid = new EntityType[GRID_SIZE_Y][GRID_SIZE_X];
         initData();
-        System.out.println("new level is ready");
+        System.out.println("level is ready");
     }
 
     public void prepare() {
@@ -155,10 +202,10 @@ public class State {
 
         prepare();
 
-        int n = getCurLevel().itemInField;
+        int n = getCurLevel().getItemInField();
         int width = GRID_SIZE_X - 4;
         int height = GRID_SIZE_Y - 4;
-        int destroyers = getCurLevel().itemInFieldDestroyers;
+        int destroyers = getCurLevel().getItemInFieldDestroyers();
         Random rnd = new Random();
         for (int i = 0; i < n; i++) {
             ItemType itemType = ItemType.STD;
@@ -219,6 +266,31 @@ public class State {
                 .map(strArr -> new Score(strArr[0], Integer.parseInt(strArr[1])))
                 .sorted(Comparator.comparing(Score::getScore).reversed())
                 .collect(Collectors.toList());
+    }
+
+    public boolean isEnterName() {
+        return enterName;
+    }
+
+    public void setEnterName(boolean enterName) {
+        this.enterName = enterName;
+    }
+
+
+    public int getScore() {
+        return score;
+    }
+
+    public int getLifes() {
+        return lifes;
+    }
+
+    public boolean isPause() {
+        return isPause;
+    }
+
+    public boolean isReadyForNewLevel() {
+        return isReadyForNewLevel;
     }
 
 

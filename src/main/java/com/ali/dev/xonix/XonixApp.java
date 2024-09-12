@@ -1,5 +1,6 @@
 package com.ali.dev.xonix;
 
+import com.ali.dev.xonix.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.swing.*;
@@ -10,7 +11,7 @@ import java.io.*;
 
 import static com.ali.dev.xonix.Config.*;
 
-public class XonixApp extends JFrame implements Engine.GameOverListener {
+public class XonixApp extends JFrame implements GameOverListener {
     private static JFrame splashFrame;
     private final KeyboardInput keyboard = new KeyboardInput();
     private final BufferedImage buffer;
@@ -42,7 +43,7 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (state.gameOver) {
+                if (state.isGameOver()) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         processEnterName();
                     } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && nameInput.length() > YOU_NAME.length()) {
@@ -80,19 +81,17 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
     }
 
     private void processEscapeKey() {
-        state.gameOver = false;
-        state.enterName = false;
-        state.lifes = INIT_LIFES;
-        // open the same level
-        state.curLevel--;
-        state.nextLevel();
+        state.setGameOver(false);
+        state.setEnterName(false);
+        state.setLifes(INIT_LIFES);
+        state.thisLevel();
     }
 
     private void processEnterName() {
         if (nameInput.length() >= YOU_NAME.length() + NAME_MIN_LENGTH) {
             state.addScore(nameInput.substring(YOU_NAME.length()));
             nameInput.delete(0, nameInput.length());
-            state.enterName = false;
+            state.setEnterName(false);
             try {
                 state.storeScores();
             } catch (IOException ex) {
@@ -191,41 +190,41 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
             }
         }
 
-        state.bonuses.forEach(b -> {
-            bufferGraphics.drawImage(b.type.image, calcX(b.pos.x), calcY(b.pos.y), null);
+        state.getBonuses().forEach(b -> {
+            bufferGraphics.drawImage(b.type.image, calcX(b.pos.getX()), calcY(b.pos.getY()), null);
         });
 
         // Draw the items
-        for (Item item : state.items) {
-            bufferGraphics.setColor(calcColor(item.area, item.type));
-            bufferGraphics.fillOval((int) item.currentX + CELL_SIZE / 4, (int) item.currentY + CELL_SIZE / 4, 3 * CELL_SIZE / 4, 3 * CELL_SIZE / 4);
+        for (Item item : state.getItems()) {
+            bufferGraphics.setColor(calcColor(item.getArea(), item.getType()));
+            bufferGraphics.fillOval((int) item.getCurrentX() + CELL_SIZE / 4, (int) item.getCurrentY() + CELL_SIZE / 4, 3 * CELL_SIZE / 4, 3 * CELL_SIZE / 4);
         }
 
         // Draw the highlighted cell
-        highLightCell(Color.YELLOW, state.head.pos.x, state.head.pos.y);
+        highLightCell(Color.YELLOW, state.getHead().getPos().getX(), state.getHead().getPos().getY());
 
         printStatus();
 
-        if (state.isPause) {
+        if (state.isPause()) {
             bufferGraphics.setColor(Color.WHITE);
             bufferGraphics.drawString("Paused", Config.WIDTH / 2 - 20, Config.HEIGHT / 2);
         }
 
-        if (state.isReadyForNewLevel) {
+        if (state.isReadyForNewLevel()) {
             bufferGraphics.setColor(Color.WHITE);
             bufferGraphics.setFont(TIMER_FONT);
             String mes = "Next Level: ";
-            bufferGraphics.drawString(mes + (state.curLevel + 2), Config.WIDTH / 2 - mes.length() * bufferGraphics.getFont().getSize() / 3, Config.HEIGHT / 2);
+            bufferGraphics.drawString(mes + (state.getCurLevelNumber() + 2), Config.WIDTH / 2 - mes.length() * bufferGraphics.getFont().getSize() / 3, Config.HEIGHT / 2);
         }
 
         bufferGraphics.setColor(Color.cyan);
-        state.getCurLevel().sliders.forEach(sl -> {
+        state.getCurLevel().getSliders().forEach(sl -> {
             // Устанавливаем стиль линии
             bufferGraphics.setStroke(DASHED_STROKE);
-            bufferGraphics.drawRect(sl.x, sl.y, sl.width, sl.height);
+            bufferGraphics.drawRect(sl.getX(), sl.getY(), sl.getWidth(), sl.getHeight());
         });
 
-        if (state.gameOver) {
+        if (state.isGameOver()) {
             paintGameOverArea(bufferGraphics);
         }
 
@@ -249,14 +248,14 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         bufferGraphics.setFont(new Font("Arial", Font.PLAIN, 24));
         int yOffset = 300;
         int inputX = 450;
-        for (int i = 0; i < state.topScores.size(); i++) {
-            var score = state.topScores.get(i);
+        for (int i = 0; i < state.getTopScores().size(); i++) {
+            var score = state.getTopScores().get(i);
             bufferGraphics.drawString((i + 1) + ". " + score.getName() + ": " + score.getScore(), inputX, yOffset);
             yOffset += 40;
         }
 
 
-        if (state.enterName) {
+        if (state.isEnterName()) {
 
             bufferGraphics.setColor(Color.YELLOW);
             bufferGraphics.drawString(nameInput.toString(), inputX, yOffset);
@@ -278,13 +277,13 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
     private void printStatus() {
         bufferGraphics.setFont(STATUS_FONT);
         bufferGraphics.setColor(STATUS_COLOR);
-        bufferGraphics.drawString("Lifes: " + state.lifes, 20, 60);
-        bufferGraphics.drawString("Score: " + state.score, 120, 60);
-        bufferGraphics.drawString("Progress: " + String.format("%6.2f", state.progress * 100), 450, 60);
+        bufferGraphics.drawString("Lifes: " + state.getLifes(), 20, 60);
+        bufferGraphics.drawString("Score: " + state.getScore(), 120, 60);
+        bufferGraphics.drawString("Progress: " + String.format("%6.2f", state.getProgress() * 100), 450, 60);
         bufferGraphics.drawString("Target: " +
-                String.format("%6.2f", state.getCurLevel().levelThreshold), 650, 60);
+                String.format("%6.2f", state.getCurLevel().getLevelThreshold()), 650, 60);
 
-        state.activeBonuses.forEach(b -> {
+        state.getActiveBonuses().forEach(b -> {
             bufferGraphics.drawImage(b.type.image, calcX(GRID_SIZE_X - 5 + b.type.ordinal()), calcY(0) - 2 * CELL_SIZE, null);
         });
     }
