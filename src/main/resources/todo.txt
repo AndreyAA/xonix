@@ -1,3 +1,4 @@
 + splash screen
 + level configuration
-- read levels from external path
++ read levels from external path
+- hide debug info in log or add log4j

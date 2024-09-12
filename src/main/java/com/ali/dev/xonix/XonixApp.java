@@ -2,14 +2,11 @@ package com.ali.dev.xonix;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
+import java.io.*;
 
 import static com.ali.dev.xonix.Config.*;
 
@@ -23,13 +20,11 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
     private final Timer timer;
     private final StringBuilder nameInput = new StringBuilder().append(YOU_NAME);
 
-    public XonixApp() throws IOException {
+    public XonixApp(java.util.List<Level> levels) throws IOException {
         setTitle("Xonix");
         setSize(Config.WIDTH, Config.HEIGHT + 60); // Adjusted for the new panel position
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-
-        java.util.List<Level> levels = readLevels("levels.json");
 
         state = new State(new EntityType[GRID_SIZE_Y][GRID_SIZE_X], levels);
         state.readScores();
@@ -71,14 +66,10 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         requestFocus();
     }
 
-    private java.util.List<Level> readLevels(String path) throws IOException {
-        ClassLoader classLoader = Images.class.getClassLoader();
-
-        // Get the resource as an InputStream
-        InputStream inputStream = classLoader.getResourceAsStream(path);
+    private static java.util.List<Level> readLevels(String path, InputStream inputStream ) throws IOException {
 
         if (inputStream == null) {
-            throw new IllegalArgumentException("Image not found: " + path);
+            throw new IllegalArgumentException("file not found: " + path);
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -129,21 +120,43 @@ public class XonixApp extends JFrame implements Engine.GameOverListener {
         g2d.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
+        InputStream inputStream = getLevelsInputStream(args);
+        java.util.List<Level> levels;
+        try {
+            levels = readLevels("", inputStream);
+        } finally {
+            inputStream.close();
+        }
 
         createSplashScreen();
-        Thread.sleep(3000);
+        Thread.sleep(SPLASH_SCREEN_DELAY);
         splashFrame.dispose();
 
         SwingUtilities.invokeLater(() -> {
             XonixApp app = null;
             try {
-                app = new XonixApp();
+                app = new XonixApp(levels);
+                app.setVisible(true);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            app.setVisible(true);
         });
+    }
+
+    private static InputStream getLevelsInputStream(String[] args) throws FileNotFoundException {
+        InputStream inputStream;
+        if (args.length>0) {
+            File file = new File(args[0]);
+//            levelsPath=System.getProperty("user.dir") + "/" + args[0];
+            inputStream = new FileInputStream(file);
+            System.out.println("load levels file:" + args[0]);
+        } else {
+            ClassLoader classLoader = Images.class.getClassLoader();
+            // Get the resource as an InputStream
+             inputStream = classLoader.getResourceAsStream(LEVELS_PATH);
+        }
+        return inputStream;
     }
 
     public static int calcX(int col) {
