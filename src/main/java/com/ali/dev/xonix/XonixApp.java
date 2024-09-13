@@ -199,7 +199,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         }
 
         state.getBonuses().forEach(b -> {
-            if (b.getFrame() % 2 == 0 || (b.lastTick - state.getTickId()) > BONUS_STRART_BLINK_MS / TICK_TIME_MS) {
+            if (needPaint(b)) {
                 bufferGraphics.drawImage(b.type.image, calcX(b.pos.getX()), calcY(b.pos.getY()), null);
             }
         });
@@ -246,6 +246,10 @@ public class XonixApp extends JFrame implements GameOverListener {
         }
     }
 
+    private boolean needPaint(Bonus b) {
+        return b.getFrame() % 2 == 0 || (b.lastTick - state.getTickId()) > BONUS_STRART_BLINK_MS / TICK_TIME_MS;
+    }
+
     private void paintGameOverArea(Graphics2D bufferGraphics) {
         // Рисуем сообщение "Game Over" и таблицу игроков
         bufferGraphics.setColor(Color.BLACK);
@@ -266,7 +270,6 @@ public class XonixApp extends JFrame implements GameOverListener {
 
 
         if (state.isEnterName()) {
-
             bufferGraphics.setColor(Color.YELLOW);
             bufferGraphics.drawString(nameInput.toString(), inputX, yOffset);
         }
@@ -294,7 +297,9 @@ public class XonixApp extends JFrame implements GameOverListener {
                 String.format("%6.2f", state.getCurLevel().getLevelThreshold()), 650, 60);
 
         state.getActiveBonuses().forEach(b -> {
-            bufferGraphics.drawImage(b.type.image, calcX(GRID_SIZE_X - 5 + b.type.ordinal()), calcY(0) - 2 * CELL_SIZE, null);
+            if (needPaint(b)) {
+                bufferGraphics.drawImage(b.type.image, calcX(GRID_SIZE_X - 5 + b.type.ordinal()), calcY(0) - 2 * CELL_SIZE, null);
+            }
         });
     }
 

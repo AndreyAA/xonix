@@ -99,6 +99,7 @@ public class Engine {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastAnimateTime >= 500) { // 500 миллисекунд на
             state.bonuses.forEach(Bonus::incFrame);
+            state.activeBonuses.forEach(Bonus::incFrame);
             lastAnimateTime = currentTime;
         }
 
