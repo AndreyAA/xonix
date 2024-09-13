@@ -9,6 +9,7 @@ public class Config {
     public static final int TIME_FOR_BONUS_MS = 5000;
     public static final int NEXT_LEVEL_WAIT_MS = 5000;
     public static final int BONUS_LIVE_MS = 10000;
+    public static final int BONUS_STRART_BLINK_MS = 3000;
     public static final int TICK_TIME_MS = 16;
     public static final int INIT_LIFES = 3;
     public static final int GRID_SIZE_X = 108;

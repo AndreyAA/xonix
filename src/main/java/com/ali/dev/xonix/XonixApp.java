@@ -1,7 +1,5 @@
 package com.ali.dev.xonix;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.core.util.StatusPrinter;
 import com.ali.dev.xonix.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -201,7 +199,9 @@ public class XonixApp extends JFrame implements GameOverListener {
         }
 
         state.getBonuses().forEach(b -> {
-            bufferGraphics.drawImage(b.type.image, calcX(b.pos.getX()), calcY(b.pos.getY()), null);
+            if (b.getFrame() % 2 == 0 || (b.lastTick - state.getTickId()) > BONUS_STRART_BLINK_MS / TICK_TIME_MS) {
+                bufferGraphics.drawImage(b.type.image, calcX(b.pos.getX()), calcY(b.pos.getY()), null);
+            }
         });
 
         // Draw the items

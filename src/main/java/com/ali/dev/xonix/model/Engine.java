@@ -22,6 +22,7 @@ public class Engine {
     private final KeyboardInput keyboard;
     private final Random random = new Random();
     private final GameOverListener listener;
+    private long lastAnimateTime = System.currentTimeMillis();
 
     public Engine(State state, KeyboardInput keyboard, GameOverListener listener) {
         this.state = state;
@@ -92,6 +93,13 @@ public class Engine {
             moveHead();
             moveItems();
             state.progress = state.calcProgressLight(state.busyCells);
+        }
+
+        //animation
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastAnimateTime >= 500) { // 500 миллисекунд на
+            state.bonuses.forEach(Bonus::incFrame);
+            lastAnimateTime = currentTime;
         }
 
         int tickTime = (int) (System.currentTimeMillis() - start);

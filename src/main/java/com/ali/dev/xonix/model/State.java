@@ -62,6 +62,10 @@ public class State {
         return items;
     }
 
+    public long getTickId() {
+        return tickId;
+    }
+
     public Head getHead() {
         return head;
     }

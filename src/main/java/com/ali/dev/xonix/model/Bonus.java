@@ -5,6 +5,7 @@ public class Bonus {
     public BonusType type;
     public XY size;
     public long lastTick;
+    public int frame = 0;
 
     public XY getPos() {
         return pos;
@@ -20,5 +21,13 @@ public class Bonus {
 
     public long getLastTick() {
         return lastTick;
+    }
+
+    public void incFrame() {
+        frame++;
+    }
+
+    public int getFrame() {
+        return frame;
     }
 }
