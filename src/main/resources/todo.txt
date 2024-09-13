@@ -1,4 +1,7 @@
 + splash screen
 + level configuration
 + read levels from external path
-- hide debug info in log or add log4j
++ hide debug info in log or add log4j
++ item destroys bonuses
+- animate near expired bonuses
+- how to play

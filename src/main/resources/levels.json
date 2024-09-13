@@ -2,7 +2,7 @@
   {
     "itemInField": 6,
     "itemInFieldDestroyers": 2,
-    "itemOutField": 0,
+    "itemOutField": 1,
     "velocityInField": 3.0,
     "velocityOutField": 1.0,
     "levelThreshold": 80.0,

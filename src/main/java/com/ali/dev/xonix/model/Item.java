@@ -45,10 +45,6 @@ public class Item {
         var newCol = calcCol(newX + HALF_CELL);
         var newRow = calcRow(newY + HALF_CELL);
 
-        if (state.checkCollisions(newCol, newRow)) {
-            return;
-        }
-
         if (area == ItemAreaType.OutFiled) {
             if (newY <= MIN_Y - HALF_CELL || newRow <= -1 || newRow >= state.entityGrid.length || !state.entityGrid[newRow][curCol].isBusy) {
                 // Отражение от горизонтали
@@ -60,7 +56,6 @@ public class Item {
                 shift = new XY(-1 * shift.x, shift.y);
             }
         } else {
-
             boolean isBusy = state.entityGrid[newRow][curCol].isBusy;
             if (newRow < 0 || newRow >= state.entityGrid.length || isBusy) {
                 // Отражение по вертикали
@@ -85,7 +80,18 @@ public class Item {
         // Движение в текущем направлении
         currentX += shift.x * velocity;
         currentY += shift.y * velocity;
-        pos = new XY(calcCol(currentX + HALF_CELL), calcRow(currentY + HALF_CELL));
+
+        final int finalNewCol = calcCol(currentX + HALF_CELL);
+        final int finalNewRow = calcRow(currentY + HALF_CELL);
+
+        if (state.checkHeadCollisions(finalNewCol, finalNewRow)) {
+            return;
+        }
+
+        // remove bonuses
+        state.bonuses.removeIf(b -> b.pos.x == finalNewCol && b.pos.y == finalNewRow);
+
+        pos = new XY(finalNewCol, finalNewRow);
     }
 
     public ItemAreaType getArea() {

@@ -59,23 +59,26 @@ public class Engine {
                 state.nextLevel();
                 return;
             }
-        } else {
-            int x = calcX(state.head.pos.x);
-            int y = calcY(state.head.pos.y);
+        }
 
-            if (!state.inSliders(x, y)) {
-                updateKeys();
-            }
+        int x = calcX(state.head.pos.x);
+        int y = calcY(state.head.pos.y);
+
+        if (!state.inSliders(x, y)) {
+            updateKeys();
         }
 
         if (isActive(TickAction.ItemMoving) && !state.isGameOver) {
-            //hide bonuses
+            //remove expired bonuses
             state.bonuses.removeIf(b -> b.lastTick < state.tickId);
+
+            //remove expired active bonuses
             state.activeBonuses.stream()
                     .filter(b -> b.lastTick < state.tickId)
                     .forEach(b -> b.type.reject.accept(state));
             state.activeBonuses.removeIf(b -> b.lastTick < state.tickId);
 
+            // generate new bonuses
             if (state.tickId % (TIME_FOR_BONUS_MS / TICK_TIME_MS) == 0) {
                 var b = new Bonus();
                 b.pos = new XY(random.nextInt(GRID_SIZE_X - 2), random.nextInt(GRID_SIZE_Y - 2));
@@ -92,7 +95,7 @@ public class Engine {
         }
 
         int tickTime = (int) (System.currentTimeMillis() - start);
-        if (tickTime > 16) {
+        if (tickTime > TICK_TIME_MS) {
             log.warn("tick time: {} ms", tickTime);
         }
     }

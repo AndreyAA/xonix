@@ -125,7 +125,7 @@ public class State {
         return levels.get(curLevel);
     }
 
-    public boolean checkCollisions(int x, int y) {
+    public boolean checkHeadCollisions(int x, int y) {
         XY pos = new XY(x, y);
         if (head.curPath.contains(pos) || (head.pos.x == x && head.pos.y == y)) {
             failHead();
