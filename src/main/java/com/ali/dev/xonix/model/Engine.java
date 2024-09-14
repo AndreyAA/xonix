@@ -95,7 +95,7 @@ public class Engine {
             state.progress = state.calcProgressLight(state.busyCells);
         }
 
-        //animation
+        // animation
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastAnimateTime >= 500) { // 500 миллисекунд на
             state.bonuses.forEach(Bonus::incFrame);

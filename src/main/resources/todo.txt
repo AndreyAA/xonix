@@ -4,4 +4,5 @@
 + hide debug info in log or add log4j
 + item destroys bonuses
 + animate near expired bonuses
-- how to play
++ legend
+- show levels info

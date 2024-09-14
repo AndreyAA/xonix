@@ -26,7 +26,7 @@ public class State {
     long tickId = 0;
     long nextLevelTick = 0;
     int score = 0;
-    int lifes = 3;
+    int lifes = INIT_LIFES;
     boolean isPause;
     boolean isDebug;
     int curLevel;

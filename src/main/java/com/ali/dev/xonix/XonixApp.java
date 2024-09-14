@@ -215,11 +215,6 @@ public class XonixApp extends JFrame implements GameOverListener {
 
         printStatus();
 
-        if (state.isPause()) {
-            bufferGraphics.setColor(Color.WHITE);
-            bufferGraphics.drawString("Paused", Config.WIDTH / 2 - 20, Config.HEIGHT / 2);
-        }
-
         if (state.isReadyForNewLevel()) {
             bufferGraphics.setColor(Color.WHITE);
             bufferGraphics.setFont(TIMER_FONT);
@@ -227,15 +222,19 @@ public class XonixApp extends JFrame implements GameOverListener {
             bufferGraphics.drawString(mes + (state.getCurLevelNumber() + 2), Config.WIDTH / 2 - mes.length() * bufferGraphics.getFont().getSize() / 3, Config.HEIGHT / 2);
         }
 
-        bufferGraphics.setColor(Color.cyan);
+        // Устанавливаем стиль линии
+        switchOnSlidersStrikes();
         state.getCurLevel().getSliders().forEach(sl -> {
-            // Устанавливаем стиль линии
-            bufferGraphics.setStroke(DASHED_STROKE);
             bufferGraphics.drawRect(sl.getX(), sl.getY(), sl.getWidth(), sl.getHeight());
         });
+        switchOffSlidersStrikes();
 
         if (state.isGameOver()) {
             paintGameOverArea(bufferGraphics);
+        }
+
+        if (state.isPause()) {
+            paintPauseArea(bufferGraphics);
         }
 
         // Draw the buffer on the screen
@@ -244,6 +243,15 @@ public class XonixApp extends JFrame implements GameOverListener {
         if (timePaint > 10) {
             log.debug("time paint: {} ms", timePaint);
         }
+    }
+
+    private void switchOnSlidersStrikes() {
+        bufferGraphics.setColor(Color.cyan);
+        bufferGraphics.setStroke(DASHED_STROKE);
+    }
+
+    private void switchOffSlidersStrikes() {
+        bufferGraphics.setColor(Color.WHITE);
     }
 
     private boolean needPaint(Bonus b) {
@@ -273,6 +281,66 @@ public class XonixApp extends JFrame implements GameOverListener {
             bufferGraphics.setColor(Color.YELLOW);
             bufferGraphics.drawString(nameInput.toString(), inputX, yOffset);
         }
+    }
+
+    private void paintPauseArea(Graphics2D bufferGraphics) {
+        bufferGraphics.setColor(Color.BLACK);
+        bufferGraphics.fillRect(200, 120, Config.WIDTH - 400, 500);
+        bufferGraphics.setColor(Color.GRAY);
+        bufferGraphics.drawRect(200, 120, Config.WIDTH - 400, 500);
+
+        bufferGraphics.setColor(Color.WHITE);
+        bufferGraphics.setFont(new Font("Arial", Font.BOLD, 48));
+        bufferGraphics.drawString("Pause", 470, 180);
+
+        bufferGraphics.setFont(new Font("Arial", Font.PLAIN, 24));
+        int yOffset = 210;
+        int inputX = 250;
+        int i = 1;
+        int IMAGE_SHIFT = 17;
+        int SIZE = 40;
+        bufferGraphics.drawString("Controls:", inputX, yOffset + SIZE * i++);
+        bufferGraphics.drawString("left, right, up, down ", inputX, yOffset + SIZE * i++);
+        bufferGraphics.drawString("space: pause", inputX, yOffset + SIZE * i++);
+        bufferGraphics.drawString("ESC: return", inputX, yOffset + SIZE * i++);
+        i++;
+        bufferGraphics.drawString("Bolls:", inputX, yOffset + SIZE * i++);
+        paintLegendBall(bufferGraphics, inputX, yOffset, i, IMAGE_SHIFT, ItemAreaType.InField, ItemType.STD);
+        bufferGraphics.drawString("standard", inputX + 30, yOffset + SIZE * i++);
+
+        paintLegendBall(bufferGraphics, inputX, yOffset, i, IMAGE_SHIFT, ItemAreaType.InField, ItemType.DESTROYER);
+        bufferGraphics.drawString("destroyer", inputX + 30, yOffset + SIZE * i++);
+
+        paintLegendBall(bufferGraphics, inputX, yOffset, i, IMAGE_SHIFT, ItemAreaType.OutFiled, ItemType.STD);
+        bufferGraphics.drawString("ground", inputX + 30, yOffset + SIZE * i++);
+
+        i = 1;
+        inputX = 620;
+
+        bufferGraphics.drawString("Areas:", inputX, yOffset + SIZE * i++);
+
+        switchOnSlidersStrikes();
+        bufferGraphics.drawRect(inputX, yOffset + SIZE * i - IMAGE_SHIFT, 20, 20);
+        switchOffSlidersStrikes();
+        bufferGraphics.drawString("unstoppable", inputX + 30, yOffset + SIZE * i++);
+
+        i += 3;
+        bufferGraphics.drawString("Bonuses:", inputX, yOffset + SIZE * i++);
+
+        bufferGraphics.drawImage(BonusType.LIFE.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
+        bufferGraphics.drawString("life", inputX + 30, yOffset + SIZE * i++);
+
+        bufferGraphics.drawImage(BonusType.HEAD_SPEED.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
+        bufferGraphics.drawString("speed up", inputX + 30, yOffset + SIZE * i++);
+
+        bufferGraphics.drawImage(BonusType.FREEZE.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
+        bufferGraphics.drawString("slow down", inputX + 30, yOffset + SIZE * i++);
+    }
+
+    private void paintLegendBall(Graphics2D bufferGraphics, int inputX, int yOffset, int i, int IMAGE_SHIFT, ItemAreaType itemAreaType, ItemType itemType) {
+        bufferGraphics.setColor(calcColor(itemAreaType, itemType));
+        bufferGraphics.fillOval(inputX, yOffset + 40 * i - IMAGE_SHIFT, 2 * CELL_SIZE, 2 * CELL_SIZE);
+        bufferGraphics.setColor(Color.WHITE);
     }
 
     private Color calcColor(ItemAreaType type, ItemType itemType) {
