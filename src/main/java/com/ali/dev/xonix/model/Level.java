@@ -1,13 +1,18 @@
 package com.ali.dev.xonix.model;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
+
 import java.util.List;
 
 public class Level {
     int id;
     double target;
     int bonusSpawnSec;
-    List<ItemModel> items;
-    List<AreaModel> areas;
+    @JsonSetter(nulls = Nulls.SKIP)
+    List<ItemModel> items = List.of();
+    @JsonSetter(nulls = Nulls.SKIP)
+    List<AreaModel> areas = List.of();
 
     public int getId() {
         return id;
