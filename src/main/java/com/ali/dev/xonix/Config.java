@@ -6,7 +6,7 @@ public class Config {
     public static String LEVELS_PATH = "levels.json";
     public static final int NAME_MIN_LENGTH = 3;
     public static final int SPLASH_SCREEN_DELAY = 3000;
-    public static final int TIME_FOR_BONUS_MS = 1000;
+    public static final int TIME_FOR_BONUS_MS = 5000;
     public static final int NEXT_LEVEL_WAIT_MS = 5000;
     public static final int BONUS_LIVE_MS = 10000;
     public static final int BONUS_STRART_BLINK_MS = 3000;
