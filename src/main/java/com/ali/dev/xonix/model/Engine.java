@@ -5,10 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.event.KeyEvent;
-import java.util.ArrayDeque;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -64,6 +61,7 @@ public class Engine {
 
         if (isActive(TickAction.ItemMoving) && !state.isGameOver) {
             //remove expired bonuses
+            state.bonuses.stream().filter(b -> b.lastTick < state.tickId).forEach(b -> b.type.onExpire.accept(state, b));
             state.bonuses.removeIf(b -> b.lastTick < state.tickId);
 
             //remove expired active bonuses
@@ -73,10 +71,11 @@ public class Engine {
             state.activeBonuses.removeIf(b -> b.lastTick < state.tickId);
 
             // generate new bonuses
-            if (state.tickId % (TIME_FOR_BONUS_MS / TICK_TIME_MS) == 0) {
+            List<String> availableBonuses = state.getCurLevel().getAvailableBonuses();
+            if (state.tickId % (TIME_FOR_BONUS_MS / TICK_TIME_MS) == 0 && availableBonuses.size()>0) {
                 var b = new Bonus();
                 b.pos = new XY(random.nextInt(GRID_SIZE_X - 2), random.nextInt(GRID_SIZE_Y - 2));
-                b.type = BonusType.values()[random.nextInt(BonusType.values().length)];
+                b.type = BonusType.valueOf(availableBonuses.get(random.nextInt(availableBonuses.size())));
                 b.size = new XY(2, 2);
                 b.lastTick = state.tickId + BONUS_LIVE_MS / TICK_TIME_MS;
                 state.bonuses.add(b);
@@ -220,7 +219,7 @@ public class Engine {
     private XY findFirstFreePoint(EntityType[][] busy) {
         for (int y = 0; y < busy.length; y++) {
             for (int x = 0; x < busy[y].length; x++) {
-                if (!busy[y][x].isBusy) {
+                if (!busy[y][x].isBusy && busy[y][x]!=EntityType.FREE_AFTER_BOMB) {
                     return new XY(x, y);
                 }
             }

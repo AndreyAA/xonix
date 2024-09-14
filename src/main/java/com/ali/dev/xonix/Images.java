@@ -3,7 +3,6 @@ package com.ali.dev.xonix;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -11,6 +10,7 @@ public class Images {
     public static final Image bonusLife = loadImage("images/hart20.png");
     public static final Image speedUp = loadImage("images/speedup20.png");
     public static final Image freeze = loadImage("images/freeze20.png");
+    public static final Image bomb = loadImage("images/bomb20.png");
     public static final Image splash = loadImage("images/xonix.png");
 
     private static BufferedImage loadImage(String image) {

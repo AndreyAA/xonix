@@ -3,6 +3,9 @@
     "id": "1",
     "target": 70.0,
     "bonusSpawnSec": 10,
+    "availableBonuses":[
+      "LIFE"
+    ],
     "items": [
       {
         "type": "standard",
@@ -13,6 +16,11 @@
   },
   {
     "id": "2",
+    "availableBonuses":[
+      "HEAD_SPEED_UP",
+      "LIFE",
+      "FREEZE"
+    ],
     "target": 80.0,
     "bonusSpawnSec": 10,
     "items": [

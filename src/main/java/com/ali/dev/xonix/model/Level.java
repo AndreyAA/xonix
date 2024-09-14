@@ -10,12 +10,18 @@ public class Level {
     double target;
     int bonusSpawnSec;
     @JsonSetter(nulls = Nulls.SKIP)
+    List<String> availableBonuses = List.of();
+    @JsonSetter(nulls = Nulls.SKIP)
     List<ItemModel> items = List.of();
     @JsonSetter(nulls = Nulls.SKIP)
     List<AreaModel> areas = List.of();
 
     public int getId() {
         return id;
+    }
+
+    public List<String> getAvailableBonuses() {
+        return availableBonuses;
     }
 
     public int getBonusSpawnSec() {

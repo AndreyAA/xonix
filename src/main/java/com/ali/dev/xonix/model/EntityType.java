@@ -2,6 +2,7 @@ package com.ali.dev.xonix.model;
 
 public enum EntityType {
     FREE(false, false),
+    FREE_AFTER_BOMB(false, false),
     BORDER(true, false),
     BLOCK(true, true);
 
