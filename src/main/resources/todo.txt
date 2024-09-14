@@ -5,5 +5,6 @@
 + item destroys bonuses
 + animate near expired bonuses
 + legend
+- add readme.md
 - show levels info
 - two heads
