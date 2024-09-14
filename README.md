@@ -35,6 +35,48 @@
 - **Arrow Keys**: Control the machine.
 - **Spacebar**: Pause.
 
+## Configuration
+```json
+[
+  {
+    "id": "level 1",
+    "target": 80.0,
+    "items": [
+      {
+        "type": "standard",
+        "count": 6,
+        "velocity": 3
+      },
+      {
+        "type": "destroyer",
+        "count": 2,
+        "velocity": 2
+      },
+      {
+        "type": "ground",
+        "count": 2,
+        "velocity": 2
+      }
+    ],
+    "areas": [
+      {
+        "type": "slider",
+        "x": 300,
+        "y": 300,
+        "width": 200,
+        "height": 200
+      },
+      {
+        "type": "slider",
+        "x": 800,
+        "y": 600,
+        "width": 200,
+        "height": 200
+      }
+    ]
+  }
+]
+```
 ## Contribution
 We welcome contributions to the development of the game.
 
