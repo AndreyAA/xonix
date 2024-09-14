@@ -2,6 +2,7 @@
   {
     "id": "1",
     "target": 80.0,
+    "bonusSpawnSec": 10,
     "items": [
       {
         "type": "standard",

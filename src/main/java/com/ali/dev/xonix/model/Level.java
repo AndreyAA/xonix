@@ -5,11 +5,16 @@ import java.util.List;
 public class Level {
     int id;
     double target;
+    int bonusSpawnSec;
     List<ItemModel> items;
     List<AreaModel> areas;
 
     public int getId() {
         return id;
+    }
+
+    public int getBonusSpawnSec() {
+        return bonusSpawnSec;
     }
 
     public double getTarget() {

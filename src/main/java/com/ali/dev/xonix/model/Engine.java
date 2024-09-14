@@ -148,7 +148,7 @@ public class Engine {
         bonuses.forEach(b -> {
             b.type.apply.accept(state);
             if (b.type.durable) {
-                b.lastTick = state.tickId + SPAWN_BONUS_EVERY_MS / TICK_TIME_MS;
+                b.lastTick = state.tickId + state.getCurLevel().getBonusSpawnSec()*1000 / TICK_TIME_MS;
                 state.activeBonuses.add(b);
             }
         });
