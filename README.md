@@ -17,14 +17,19 @@
    2. Run the game:
       #### with maven:
       ```maven
-      mvn exec:java
+      mvn clean package exec:java
       ```
 
       #### with bash: 
-   go to xonix home dir
       ```bash
-      java -jar target/xonix-1.0-SNAPSHOT-jar-with-dependencies.jar
+        mvn clean package
+        java -jar target/xonix-1.0-SNAPSHOT-jar-with-dependencies.jar
       ```
+      
+      ### with custom levels json file:
+      ``` maven
+      mvn clean package exec:java -Dexec.args="pathToCustomLevelJsonFile"
+      ```  
 
 ## Controls
 - **Arrow Keys**: Control the machine.

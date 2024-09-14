@@ -304,7 +304,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         bufferGraphics.drawString("space: pause", inputX, yOffset + SIZE * i++);
         bufferGraphics.drawString("ESC: return", inputX, yOffset + SIZE * i++);
         i++;
-        bufferGraphics.drawString("Bolls:", inputX, yOffset + SIZE * i++);
+        bufferGraphics.drawString("Enemies:", inputX, yOffset + SIZE * i++);
         paintLegendBall(bufferGraphics, inputX, yOffset, i, IMAGE_SHIFT, ItemAreaType.InField, ItemType.STD);
         bufferGraphics.drawString("standard", inputX + 30, yOffset + SIZE * i++);
 
