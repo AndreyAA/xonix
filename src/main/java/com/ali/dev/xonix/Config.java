@@ -22,6 +22,7 @@ public class Config {
     public static final int MIN_X = 15;
     public static final int BUTTON_DELAY_MS = 500;
     public static final int BLINK_EACH_MS = 500;
+    public static final int SPAWN_BONUS_EVERY_MS = 10000;
     public static final Font STATUS_FONT = new Font("Monospaced", Font.PLAIN, 16);
     public static final Font TIMER_FONT = new Font("Monospaced", Font.PLAIN, 100);
     public static final Color CLEAR_COLOR = Color.BLACK;

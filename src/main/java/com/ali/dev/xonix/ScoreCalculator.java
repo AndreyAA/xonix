@@ -16,7 +16,7 @@ public class ScoreCalculator {
 
         //1% - 100 score points
         int base = (int) (10000 * delta);
-        double complexity = state.getCurLevel().getItemInField() * Math.pow(state.getCurLevel().getVelocityInField(), 2);
+        double complexity = state.getCurLevel().getItems().size() * 10;//todo use velocity
         int complexityBonus = (int) (complexity * delta * 1000);
         int total = base + complexityBonus;
 

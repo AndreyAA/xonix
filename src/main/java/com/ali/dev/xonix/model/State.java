@@ -84,7 +84,7 @@ public class State {
         progress = newProgress;
         score += deltaScore;
 
-        if (progress * 100.0 >= getCurLevel().getLevelThreshold()) {
+        if (progress * 100.0 >= getCurLevel().getTarget()) {
             isReadyForNewLevel = true;
             nextLevelTick = tickId + NEXT_LEVEL_WAIT_MS / Config.TICK_TIME_MS;
         }
@@ -195,7 +195,9 @@ public class State {
     }
 
     public boolean inSliders(int x, int y) {
-        return getCurLevel().sliders.stream().anyMatch(sl -> sl.contains(x, y));
+        return getCurLevel().getAreas().stream()
+                .filter(a->a.getType().equals("slider"))
+                .anyMatch(sl -> sl.contains(x, y));
     }
 
     public void initData() {
@@ -208,38 +210,62 @@ public class State {
 
         prepare();
 
-        int n = getCurLevel().getItemInField();
         int width = GRID_SIZE_X - 4;
         int height = GRID_SIZE_Y - 4;
-        int destroyers = getCurLevel().getItemInFieldDestroyers();
         Random rnd = new Random();
-        for (int i = 0; i < n; i++) {
-            ItemType itemType = ItemType.STD;
-            if (destroyers > 0 && i < destroyers) {
-                itemType = ItemType.DESTROYER;
+        // std
+        Level.ItemModel std = getCurLevel().items.stream()
+                .filter(itemModel -> itemModel.getType().equals("standard")).findAny().orElse(null);
+        if (std != null) {
+            for (int i = 0; i < std.getCount(); i++) {
+                ItemType itemType = ItemType.STD;
+                Item item = createItem(rnd, width, height, itemType, ItemAreaType.InField, std.getVelocity());
+                items.add(item);
             }
-            int x = rnd.nextInt(width) + 2;
-            int y = rnd.nextInt(height) + 2;
-            int d = rnd.nextInt(4);
-            XY dir = XY.DIRECTIONS[d];
-            Item item = new Item(new XY(x, y), new XY(dir.x, dir.y), itemType,
-                    ItemAreaType.InField, getCurLevel().velocityInField);
-            items.add(item);
         }
 
-        int out = getCurLevel().itemOutField;
-        for (int i = 0; i < out; i++) {
-            int d = rnd.nextInt(4);
-            XY dir = XY.DIRECTIONS[d];
-            Item item = new Item(new XY(rnd.nextInt(GRID_SIZE_X), GRID_SIZE_Y - 1), new XY(dir.x, dir.y),
-                    ItemType.STD, ItemAreaType.OutFiled, getCurLevel().velocityOutField);
-            items.add(item);
+        //destroyer
+        Level.ItemModel destroyer = getCurLevel().items.stream()
+                .filter(itemModel -> itemModel.getType().equals("destroyer")).findAny().orElse(null);
+        if (destroyer != null) {
+            for (int i = 0; i < destroyer.getCount(); i++) {
+                ItemType itemType = ItemType.DESTROYER;
+                Item item = createItem(rnd, width, height, itemType, ItemAreaType.InField, destroyer.getVelocity());
+                items.add(item);
+            }
         }
+
+        //ground
+        Level.ItemModel grounds = getCurLevel().items.stream()
+                .filter(itemModel -> itemModel.getType().equals("ground")).findAny().orElse(null);
+        if (grounds != null) {
+            for (int i = 0; i < grounds.getCount(); i++) {
+                ItemType itemType = ItemType.STD;
+                Item item = createItem(rnd, width, height, itemType, ItemAreaType.OutFiled, grounds.getVelocity());
+                items.add(item);
+            }
+        }
+
         head.init();
         bonuses.clear();
         initBusyCells = calcBusyCells();
         updateProgress();
         score = 0;
+    }
+
+    private Item createItem(Random rnd, int width, int height,
+                            ItemType itemType,
+                            ItemAreaType itemAreaType,
+                            double velocity) {
+        int x = rnd.nextInt(width) + 2;
+        int y = height + 2;
+        if (itemAreaType == ItemAreaType.InField) {
+            y = rnd.nextInt(height) + 2;
+        }
+        int d = rnd.nextInt(4);
+        XY dir = XY.DIRECTIONS[d];
+        return new Item(new XY(x, y), new XY(dir.x, dir.y), itemType,
+                itemAreaType, velocity);
     }
 
     public void addScore(String name) {

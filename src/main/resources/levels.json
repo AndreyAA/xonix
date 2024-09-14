@@ -1,60 +1,39 @@
 [
   {
-    "itemInField": 6,
-    "itemInFieldDestroyers": 2,
-    "itemOutField": 1,
-    "velocityInField": 3.0,
-    "velocityOutField": 1.0,
-    "levelThreshold": 80.0,
-    "sliders": [
+    "id": "1",
+    "target": 80.0,
+    "items": [
       {
+        "type": "standard",
+        "count": 6,
+        "velocity": 3
+      },
+      {
+        "type": "destroyer",
+        "count": 2,
+        "velocity": 2
+      },
+      {
+        "type": "ground",
+        "count": 2,
+        "velocity": 2
+      }
+    ],
+    "areas": [
+      {
+        "type": "slider",
         "x": 300,
         "y": 300,
         "width": 200,
         "height": 200
       },
       {
+        "type": "slider",
         "x": 800,
         "y": 600,
         "width": 200,
         "height": 200
       }
     ]
-  },
-  {
-    "itemInField": 2,
-    "itemInFieldDestroyers": 2,
-    "itemOutField": 0,
-    "velocityInField": 2.0,
-    "velocityOutField": 1.0,
-    "levelThreshold": 80.0,
-    "sliders": []
-  },
-  {
-    "itemInField": 5,
-    "itemInFieldDestroyers": 0,
-    "itemOutField": 1,
-    "velocityInField": 3.0,
-    "velocityOutField": 1.0,
-    "levelThreshold": 90.0,
-    "sliders": []
-  },
-  {
-    "itemInField": 7,
-    "itemInFieldDestroyers": 0,
-    "itemOutField": 2,
-    "velocityInField": 1.0,
-    "velocityOutField": 1.0,
-    "levelThreshold": 95.0,
-    "sliders": []
-  },
-  {
-    "itemInField": 10,
-    "itemInFieldDestroyers": 0,
-    "itemOutField": 4,
-    "velocityInField": 3.0,
-    "velocityOutField": 1.0,
-    "levelThreshold": 97.0,
-    "sliders": []
   }
 ]

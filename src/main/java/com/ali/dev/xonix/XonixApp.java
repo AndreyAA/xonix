@@ -224,7 +224,7 @@ public class XonixApp extends JFrame implements GameOverListener {
 
         // Устанавливаем стиль линии
         switchOnSlidersStrikes();
-        state.getCurLevel().getSliders().forEach(sl -> {
+        state.getCurLevel().getAreas().stream().filter(a->a.getType().equals("slider")).forEach(sl -> {
             bufferGraphics.drawRect(sl.getX(), sl.getY(), sl.getWidth(), sl.getHeight());
         });
         switchOffSlidersStrikes();
@@ -362,7 +362,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         bufferGraphics.drawString("Score: " + state.getScore(), 120, 60);
         bufferGraphics.drawString("Progress: " + String.format("%6.2f", state.getProgress() * 100), 450, 60);
         bufferGraphics.drawString("Target: " +
-                String.format("%6.2f", state.getCurLevel().getLevelThreshold()), 650, 60);
+                String.format("%6.2f", state.getCurLevel().getTarget()), 650, 60);
 
         state.getActiveBonuses().forEach(b -> {
             if (needPaint(b)) {
