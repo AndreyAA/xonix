@@ -22,20 +22,13 @@ public class Engine {
     private final KeyboardInput keyboard;
     private final Random random = new Random();
     private final GameOverListener listener;
+
     private long lastAnimateTime = System.currentTimeMillis();
 
     public Engine(State state, KeyboardInput keyboard, GameOverListener listener) {
         this.state = state;
         this.keyboard = keyboard;
         this.listener = listener;
-    }
-
-    public static int calcCol(int x) {
-        return (x - MIN_X) / CELL_SIZE;
-    }
-
-    public static int calcRow(int y) {
-        return (y - MIN_Y) / CELL_SIZE;
     }
 
     public void tick() {
@@ -97,9 +90,11 @@ public class Engine {
 
         // animation
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastAnimateTime >= 500) { // 500 миллисекунд на
-            state.bonuses.forEach(Bonus::incFrame);
-            state.activeBonuses.forEach(Bonus::incFrame);
+        if (currentTime - lastAnimateTime >= BLINK_EACH_MS) { // 500 миллисекунд на
+            if (!state.isPause) {
+                state.bonuses.forEach(Bonus::incFrame);
+                state.activeBonuses.forEach(Bonus::incFrame);
+            }
             lastAnimateTime = currentTime;
         }
 
@@ -129,7 +124,7 @@ public class Engine {
                 return;
             }
 
-            if (state.head.curPath.size() > 0) {
+            if (!state.head.curPath.isEmpty()) {
                 if (state.entityGrid[newPos.y][newPos.x].isBusy) {
                     //вернулись назад
                     state.head.curPath.clear();
@@ -171,11 +166,8 @@ public class Engine {
         // take first free cell and fill all
         // if item is present in this cluster than skip it
         // and take next free cell
-
-
         var itemsSet = new HashSet<>();
         state.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(i -> itemsSet.add(new XY(i.pos.x, i.pos.y)));
-        // copy busy arr todo use the same array
         for (int i = 0; i < state.entityGrid.length; i++) {
             System.arraycopy(state.entityGrid[i], 0, state.checkingBusy[i], 0, state.entityGrid[0].length);
         }
@@ -192,9 +184,9 @@ public class Engine {
             })) {
                 log.debug("empty area");
                 // fill in by blocks
-                isEmptyArea(itemsSet, state.entityGrid, startPoint, (y, x) -> {
-                    state.entityGrid[y][x] = EntityType.BLOCK;
-                });
+                isEmptyArea(itemsSet, state.entityGrid, startPoint,
+                        (y, x) -> state.entityGrid[y][x] = EntityType.BLOCK
+                );
                 // continue to find next empty area
             } else {
                 log.debug("not empty area");

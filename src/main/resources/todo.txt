@@ -6,3 +6,4 @@
 + animate near expired bonuses
 + legend
 - show levels info
+- two heads
