@@ -35,6 +35,10 @@
 - **Arrow Keys**: Control the machine.
 - **Spacebar**: Pause.
 
+## Screenshots
+![Local Image](images/screenshot1.png)
+![Local Image](images/screenshot2.png)
+
 ## Configuration
 ```json
 [
