@@ -323,9 +323,9 @@ public class XonixApp extends JFrame implements GameOverListener {
 
     private void paintPauseArea(Graphics2D bufferGraphics) {
         bufferGraphics.setColor(Color.BLACK);
-        bufferGraphics.fillRect(200, 120, Config.WIDTH - 400, 500);
+        bufferGraphics.fillRect(200, 120, Config.WIDTH - 400, 550);
         bufferGraphics.setColor(Color.GRAY);
-        bufferGraphics.drawRect(200, 120, Config.WIDTH - 400, 500);
+        bufferGraphics.drawRect(200, 120, Config.WIDTH - 400, 550);
 
         bufferGraphics.setColor(Color.WHITE);
         bufferGraphics.setFont(new Font("Arial", Font.BOLD, 48));
@@ -365,17 +365,10 @@ public class XonixApp extends JFrame implements GameOverListener {
         i += 3;
         bufferGraphics.drawString("Bonuses:", inputX, yOffset + SIZE * i++);
 
-        bufferGraphics.drawImage(BonusType.LIFE.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
-        bufferGraphics.drawString("life", inputX + 30, yOffset + SIZE * i++);
-
-        bufferGraphics.drawImage(BonusType.HEAD_SPEED_UP.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
-        bufferGraphics.drawString("speed up", inputX + 30, yOffset + SIZE * i++);
-
-        bufferGraphics.drawImage(BonusType.SLOW_DOWN.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
-        bufferGraphics.drawString("slow down", inputX + 30, yOffset + SIZE * i++);
-
-        bufferGraphics.drawImage(BonusType.BOMB.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
-        bufferGraphics.drawString("bomb", inputX + 30, yOffset + SIZE * i++);
+        for (BonusType type: BonusType.values()) {
+            bufferGraphics.drawImage(type.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
+            bufferGraphics.drawString(type.name, inputX + 30, yOffset + SIZE * i++);
+        }
     }
 
     private void paintLegendBall(Graphics2D bufferGraphics, int inputX, int yOffset, int i, int IMAGE_SHIFT, ItemAreaType itemAreaType, ItemType itemType) {

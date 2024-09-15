@@ -147,7 +147,7 @@ public class Engine {
         var bonuses = state.bonuses.stream().filter(b -> hasCollision(state.head, b.pos, b.size)).collect(Collectors.toList());
         bonuses.forEach(b -> {
             b.type.apply.accept(state);
-            if (b.type.durable) {
+            if (b.type.canBeActive) {
                 b.lastTick = state.tickId + state.getCurLevel().getBonusSpawnSec()*1000 / TICK_TIME_MS;
                 state.activeBonuses.add(b);
             }
