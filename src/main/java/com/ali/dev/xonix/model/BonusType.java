@@ -14,21 +14,21 @@ public enum BonusType {
             Images.bonusLife,
             false,
             (s, b) -> {},
-            true),
+            true, true),
     HEAD_SPEED_UP("speed up head",
             s -> s.head.velocity = 2,
             s -> s.head.velocity = 1,
             Images.speedUp,
             true,
             (s, b) -> {},
-            true),
+            true, false),
     SLOW_DOWN("slow down enemies",
             s -> s.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(Item::slowDown),
             s -> s.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(Item::restore),
             Images.freeze,
             true,
             (s, b) -> {},
-            true),
+            true, false),
     BOMB("bomb",
             s -> {},
             s -> {},
@@ -47,7 +47,7 @@ public enum BonusType {
                 }
                 s.updateProgress();
             },
-            false);
+            false, true);
 
     public final String name;
     // invoked when head touched the bonus
@@ -62,10 +62,11 @@ public enum BonusType {
     public final boolean canBeActive;
     // does it help head
     public final boolean isHeadHelp;
+    public final boolean canBeSeveral;
 
     BonusType(String name, Consumer<State> apply, Consumer<State> restore, Image image,
               boolean canBeActive, BiConsumer<State, Bonus> onExpire,
-              boolean isHeadHelp) {
+              boolean isHeadHelp, boolean canBeSeveral) {
         this.name = name;
         this.apply = apply;
         this.restore = restore;
@@ -73,5 +74,6 @@ public enum BonusType {
         this.canBeActive = canBeActive;
         this.onExpire = onExpire;
         this.isHeadHelp = isHeadHelp;
+        this.canBeSeveral = canBeSeveral;
     }
 }

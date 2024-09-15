@@ -13,4 +13,5 @@
 
 bugs:
 + if head was failed during moving and active slow down.
++ only specific bonuses can be present in several instances {bomb, life}
 - ground move to head path then head failed => ground stay in the field and can't move

@@ -72,14 +72,23 @@ public class Engine {
             state.activeBonuses.removeIf(b -> b.lastTick < state.tickId);
 
             // generate new bonuses
-            List<String> availableBonuses = state.getCurLevel().getAvailableBonuses();
-            if (state.tickId % (TIME_FOR_BONUS_MS / TICK_TIME_MS) == 0 && availableBonuses.size()>0) {
-                var b = new Bonus();
-                b.pos = new XY(random.nextInt(GRID_SIZE_X - 2), random.nextInt(GRID_SIZE_Y - 2));
-                b.type = BonusType.valueOf(availableBonuses.get(random.nextInt(availableBonuses.size())));
-                b.size = new XY(2, 2);
-                b.lastTick = state.tickId + BONUS_LIVE_MS / TICK_TIME_MS;
-                state.bonuses.add(b);
+            List<String> levelBonuses = state.getCurLevel().getAvailableBonuses();
+            if (state.tickId % (BONUS_SPAWN_TIME_MS / TICK_TIME_MS) == 0 && !levelBonuses.isEmpty()) {
+                Set<BonusType> activeBonusTypes = new HashSet<>();
+                state.bonuses.stream().filter(b -> !b.type.canBeSeveral).forEach(b -> activeBonusTypes.add(b.type));
+                state.activeBonuses.stream().filter(b -> !b.type.canBeSeveral).forEach(b -> activeBonusTypes.add(b.type));
+                List<BonusType> allBonusTypes = state.getCurLevel().getAvailableBonuses().stream()
+                        .map(BonusType::valueOf)
+                        .collect(Collectors.toList());
+                allBonusTypes.removeAll(activeBonusTypes);
+                if (!allBonusTypes.isEmpty()) {
+                    var b = new Bonus();
+                    b.pos = new XY(random.nextInt(GRID_SIZE_X - 2), random.nextInt(GRID_SIZE_Y - 2));
+                    b.type = allBonusTypes.get(random.nextInt(allBonusTypes.size()));
+                    b.size = new XY(2, 2);
+                    b.lastTick = state.tickId + BONUS_LIVE_MS / TICK_TIME_MS;
+                    state.bonuses.add(b);
+                }
             }
 
             // one tick - move 1 pixel
