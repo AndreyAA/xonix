@@ -325,5 +325,7 @@ public class State {
         return isReadyForNewLevel;
     }
 
-
+    public void setCurLevel(int curLevel) {
+        this.curLevel = curLevel;
+    }
 }

@@ -2,6 +2,7 @@ package com.ali.dev.xonix;
 
 import com.ali.dev.xonix.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +25,14 @@ public class XonixApp extends JFrame implements GameOverListener {
     private final Timer timer;
     private final StringBuilder nameInput = new StringBuilder().append(YOU_NAME);
 
-    public XonixApp(java.util.List<Level> levels) throws IOException {
+    public XonixApp(java.util.List<Level> levels, int curLevel) throws IOException {
         setTitle("Xonix");
         setSize(Config.WIDTH, Config.HEIGHT + 60); // Adjusted for the new panel position
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
         state = new State(new EntityType[GRID_SIZE_Y][GRID_SIZE_X], levels);
+        state.setCurLevel(curLevel);
         state.readScores();
         state.initData();
 
@@ -123,12 +125,49 @@ public class XonixApp extends JFrame implements GameOverListener {
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
-/*
-        // add log status info
-        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-        StatusPrinter.print(lc);*/
-        log.debug("start");
-        InputStream inputStream = getLevelsInputStream(args);
+        Options options = new Options();
+
+        options.addOption(Option.builder("l")
+                .longOpt("level")
+                .hasArg()
+                .argName("level")
+                .desc("active level")
+                .build());
+
+        options.addOption(Option.builder("s")
+                .longOpt("settings")
+                .hasArg()
+                .argName("filePath")
+                .desc("Path to the source file")
+                .build());
+
+        // Создаем объект CommandLineParser
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd;
+
+        int level = 0;
+        String filePath = null;
+
+        try {
+            // Парсим аргументы командной строки
+            cmd = parser.parse(options, args);
+
+            // Обрабатываем опции
+            if (cmd.hasOption("l")) {
+                String lengthStr = cmd.getOptionValue("l");
+                level = Integer.parseInt(lengthStr);
+            }
+
+            if (cmd.hasOption("s")) {
+                filePath = cmd.getOptionValue("s");
+            }
+        } catch (ParseException e) {
+            System.out.println("Parsing failed.  Reason: " + e.getMessage());
+            formatter.printHelp("CommandLineApp", options);
+        }
+
+        InputStream inputStream = getLevelsInputStream(filePath);
         java.util.List<Level> levels;
         try {
             levels = readLevels("", inputStream);
@@ -140,10 +179,11 @@ public class XonixApp extends JFrame implements GameOverListener {
         Thread.sleep(SPLASH_SCREEN_DELAY);
         splashFrame.dispose();
 
+        int curLevel = level;
         SwingUtilities.invokeLater(() -> {
             XonixApp app = null;
             try {
-                app = new XonixApp(levels);
+                app = new XonixApp(levels, curLevel);
                 app.setVisible(true);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -151,13 +191,11 @@ public class XonixApp extends JFrame implements GameOverListener {
         });
     }
 
-    private static InputStream getLevelsInputStream(String[] args) throws FileNotFoundException {
+    private static InputStream getLevelsInputStream(String filePath) throws FileNotFoundException {
         InputStream inputStream;
-        if (args.length>0) {
-            File file = new File(args[0]);
-//            levelsPath=System.getProperty("user.dir") + "/" + args[0];
-            inputStream = new FileInputStream(file);
-            log.info("load levels from file: {}", args[0]);
+        if (filePath!=null) {
+            inputStream = new FileInputStream(filePath);
+            log.info("load levels from file: {}", filePath);
         } else {
             ClassLoader classLoader = Images.class.getClassLoader();
             // Get the resource as an InputStream

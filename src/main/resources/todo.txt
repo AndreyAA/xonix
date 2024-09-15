@@ -5,7 +5,9 @@
 + item destroys bonuses
 + animate near expired bonuses
 + legend
-- add readme.md
++ add readme.md
++ add bomb
++ add command line param -l for start level number
 - show levels info
 - two heads
 
