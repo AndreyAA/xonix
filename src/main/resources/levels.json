@@ -19,7 +19,7 @@
     "availableBonuses":[
       "HEAD_SPEED_UP",
       "LIFE",
-      "FREEZE",
+      "SLOW_DOWN",
       "BOMB"
     ],
     "target": 80.0,

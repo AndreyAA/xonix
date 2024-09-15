@@ -129,9 +129,10 @@ public class State {
         return levels.get(curLevel);
     }
 
-    public boolean checkHeadCollisions(int x, int y) {
+    public boolean checkHeadCollisions(Item item, int x, int y) {
         XY pos = new XY(x, y);
-        if (head.curPath.contains(pos) || (head.pos.x == x && head.pos.y == y)) {
+        if ((head.curPath.contains(pos) && item.getArea() != ItemAreaType.OutFiled)
+                || (head.pos.x == x && head.pos.y == y)) {
             failHead();
             return true;
         }
@@ -146,6 +147,7 @@ public class State {
         head.curPath.clear();
         head.pos = (head.startPoint != null) ? head.startPoint : new XY(GRID_SIZE_X / 2, 0);
         head.shift = XY.STOP;
+        activeBonuses.stream().forEach(b -> b.type.restore.accept(this));
         activeBonuses.clear();
         lifes--;
     }

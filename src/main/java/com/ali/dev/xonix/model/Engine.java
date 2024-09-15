@@ -68,7 +68,7 @@ public class Engine {
             //remove expired active bonuses
             state.activeBonuses.stream()
                     .filter(b -> b.lastTick < state.tickId)
-                    .forEach(b -> b.type.reject.accept(state));
+                    .forEach(b -> b.type.restore.accept(state));
             state.activeBonuses.removeIf(b -> b.lastTick < state.tickId);
 
             // generate new bonuses

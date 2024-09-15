@@ -45,7 +45,7 @@ public class Item {
         var newCol = calcCol(newX + HALF_CELL);
         var newRow = calcRow(newY + HALF_CELL);
 
-        if (state.checkHeadCollisions(newCol, newRow)) {
+        if (state.checkHeadCollisions(this, newCol, newRow)) {
             return;
         }
 
@@ -89,7 +89,7 @@ public class Item {
         final int finalNewRow = calcRow(currentY + HALF_CELL);
 
         // remove bonuses
-        state.bonuses.removeIf(b -> b.type.isHelp && b.pos.x == finalNewCol && b.pos.y == finalNewRow);
+        state.bonuses.removeIf(b -> b.type.isHeadHelp && b.pos.x == finalNewCol && b.pos.y == finalNewRow);
         pos = new XY(finalNewCol, finalNewRow);
     }
 

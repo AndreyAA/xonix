@@ -12,4 +12,5 @@
 - two heads
 
 bugs:
-- if head was failed during moving and active slow down. then slow down become forether !
++ if head was failed during moving and active slow down.
+- ground move to head path then head failed => ground stay in the field and can't move

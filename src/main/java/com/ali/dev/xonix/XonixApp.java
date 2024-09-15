@@ -371,7 +371,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         bufferGraphics.drawImage(BonusType.HEAD_SPEED_UP.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
         bufferGraphics.drawString("speed up", inputX + 30, yOffset + SIZE * i++);
 
-        bufferGraphics.drawImage(BonusType.FREEZE.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
+        bufferGraphics.drawImage(BonusType.SLOW_DOWN.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
         bufferGraphics.drawString("slow down", inputX + 30, yOffset + SIZE * i++);
 
         bufferGraphics.drawImage(BonusType.BOMB.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);

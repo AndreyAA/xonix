@@ -11,7 +11,7 @@ public enum BonusType {
     LIFE(s -> s.lifes++, s -> {
     }, Images.bonusLife, false, (s, b) -> {}, true),
     HEAD_SPEED_UP(s -> s.head.velocity = 2, s -> s.head.velocity = 1, Images.speedUp, true, (s, b) -> {}, true),
-    FREEZE(s -> s.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(Item::slowDown),
+    SLOW_DOWN(s -> s.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(Item::slowDown),
             s -> s.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(Item::restore),
             Images.freeze, true, (s, b) -> {}, true),
     BOMB(s -> {},
@@ -32,20 +32,20 @@ public enum BonusType {
             }, false);
 
     public final Consumer<State> apply;
-    public final Consumer<State> reject;
+    public final Consumer<State> restore;
     public final BiConsumer<State, Bonus> onExpire;
     public final Image image;
     public final boolean durable;
-    public final boolean isHelp;
+    public final boolean isHeadHelp;
 
-    BonusType(Consumer<State> apply, Consumer<State> reject, Image image,
+    BonusType(Consumer<State> apply, Consumer<State> restore, Image image,
               boolean durable, BiConsumer<State, Bonus> onExpire,
-              boolean isHelp) {
+              boolean isHeadHelp) {
         this.apply = apply;
-        this.reject = reject;
+        this.restore = restore;
         this.image = image;
         this.durable = durable;
         this.onExpire = onExpire;
-        this.isHelp = isHelp;
+        this.isHeadHelp = isHeadHelp;
     }
 }
