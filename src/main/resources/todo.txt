@@ -8,3 +8,6 @@
 - add readme.md
 - show levels info
 - two heads
+
+bugs:
+- if head was failed during moving and active slow down. then slow down become forether !

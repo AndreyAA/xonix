@@ -89,8 +89,7 @@ public class Item {
         final int finalNewRow = calcRow(currentY + HALF_CELL);
 
         // remove bonuses
-        state.bonuses.removeIf(b -> b.pos.x == finalNewCol && b.pos.y == finalNewRow);
-
+        state.bonuses.removeIf(b -> b.type.isHelp && b.pos.x == finalNewCol && b.pos.y == finalNewRow);
         pos = new XY(finalNewCol, finalNewRow);
     }
 

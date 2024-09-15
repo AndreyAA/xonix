@@ -9,12 +9,11 @@ import java.util.function.Consumer;
 
 public enum BonusType {
     LIFE(s -> s.lifes++, s -> {
-    }, Images.bonusLife, false, (s, b) -> {}),
-    HEAD_SPEED_UP(s -> s.head.velocity = 2, s -> s.head.velocity = 1, Images.speedUp, true, (s, b) -> {}),
+    }, Images.bonusLife, false, (s, b) -> {}, true),
+    HEAD_SPEED_UP(s -> s.head.velocity = 2, s -> s.head.velocity = 1, Images.speedUp, true, (s, b) -> {}, true),
     FREEZE(s -> s.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(Item::slowDown),
             s -> s.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(Item::restore),
-            Images.freeze, true, (s, b) -> {}),
-    // todo: incompleted implementation
+            Images.freeze, true, (s, b) -> {}, true),
     BOMB(s -> {},
             s -> {},
             Images.bomb, false,
@@ -30,19 +29,23 @@ public enum BonusType {
                     }
                 }
                 s.updateProgress();
-            });
+            }, false);
 
     public final Consumer<State> apply;
     public final Consumer<State> reject;
     public final BiConsumer<State, Bonus> onExpire;
     public final Image image;
     public final boolean durable;
+    public final boolean isHelp;
 
-    BonusType(Consumer<State> apply, Consumer<State> reject, Image image, boolean durable, BiConsumer<State, Bonus> onExpire) {
+    BonusType(Consumer<State> apply, Consumer<State> reject, Image image,
+              boolean durable, BiConsumer<State, Bonus> onExpire,
+              boolean isHelp) {
         this.apply = apply;
         this.reject = reject;
         this.image = image;
         this.durable = durable;
         this.onExpire = onExpire;
+        this.isHelp = isHelp;
     }
 }
