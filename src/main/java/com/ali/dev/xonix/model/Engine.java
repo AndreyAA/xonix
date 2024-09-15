@@ -127,9 +127,9 @@ public class Engine {
             if (!state.head.curPath.isEmpty()) {
                 if (state.entityGrid[newPos.y][newPos.x].isBusy) {
                     //вернулись назад
-                    state.head.curPath.clear();
                     log.debug("end moving: {}", state.head.pos);
                     algo.updateState();
+                    state.head.curPath.clear();
                 } else {
                     // продолжаем движение
                     state.head.curPath.add(newPos);

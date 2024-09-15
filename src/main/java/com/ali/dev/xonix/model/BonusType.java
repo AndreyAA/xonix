@@ -24,7 +24,7 @@ public enum BonusType {
                         if (s.entityGrid[y][x] == EntityType.BLOCK) {
                             int r = (int) (Math.pow(b.pos.x - x, 2) + Math.pow(b.pos.y - y, 2));
                             if (r <= 100) {
-                                s.entityGrid[y][x] = EntityType.FREE_AFTER_BOMB;
+                                s.entityGrid[y][x] = EntityType.FREE;
                             }
                         }
                     }

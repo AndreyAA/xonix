@@ -1,25 +1,12 @@
 [
-  {
-    "id": "1",
-    "target": 70.0,
-    "bonusSpawnSec": 10,
-    "availableBonuses":[
-      "LIFE"
-    ],
-    "items": [
-      {
-        "type": "standard",
-        "count": 3,
-        "velocity": 2
-      }
-    ]
-  },
+
   {
     "id": "2",
     "availableBonuses":[
       "HEAD_SPEED_UP",
       "LIFE",
-      "FREEZE"
+      "FREEZE",
+      "BOMB"
     ],
     "target": 80.0,
     "bonusSpawnSec": 10,
@@ -54,6 +41,22 @@
         "y": 600,
         "width": 200,
         "height": 200
+      }
+    ]
+  },
+  {
+    "id": "1",
+    "target": 70.0,
+    "bonusSpawnSec": 10,
+    "availableBonuses":[
+      "LIFE",
+      "BOMB"
+    ],
+    "items": [
+      {
+        "type": "standard",
+        "count": 3,
+        "velocity": 2
       }
     ]
   }

@@ -3,9 +3,7 @@ package com.ali.dev.xonix.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayDeque;
-import java.util.HashSet;
-import java.util.Queue;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 import static com.ali.dev.xonix.Config.GRID_SIZE_X;
@@ -34,21 +32,38 @@ public class Algo {
     }
 
     private void processGrid(HashSet<Object> itemsSet, EntityType[][] busy) {
-        XY startPoint;
-        while ((startPoint = findFirstFreePoint(busy)) != null) {
+        Set<XY> pointsToStartFilling = collectPointsToStartFilling(busy);
+        log.debug("points to check: {}", pointsToStartFilling);
+        for (XY startPoint : pointsToStartFilling) {
+
             log.debug("check area from point: {}", startPoint);
+            if (busy[startPoint.y][startPoint.x].isBusy) {
+                log.debug("already marked as busy: {}", startPoint);
+                continue;
+            }
             if (isEmptyArea(itemsSet, busy, startPoint, (y, x) -> {
             })) {
                 log.debug("empty area");
                 // fill in by blocks
                 isEmptyArea(itemsSet, state.entityGrid, startPoint,
-                        (y, x) -> state.entityGrid[y][x] = EntityType.BLOCK
+                        (y, x) -> {
+                    state.entityGrid[y][x] = EntityType.BLOCK;
+                    log.debug("mark as block x: {}, y:{}", x ,y);
+                        }
                 );
                 // continue to find next empty area
             } else {
                 log.debug("not empty area");
             }
         }
+    }
+
+    private Set<XY> collectPointsToStartFilling(EntityType[][] busy) {
+        Set<XY> result = new HashSet<>();
+        for (XY xy: state.head.getCurPath()) {
+            addFreeNear(xy, result, busy);
+        }
+        return result;
     }
 
     private boolean isEmptyArea(HashSet<Object> itemsSet, EntityType[][] busy, XY startPoint, BiConsumer<Integer, Integer> consumer) {
@@ -66,10 +81,10 @@ public class Algo {
         }
 
         if (foundItem) {
-            // надо закрасить на основной доске
             log.debug("found item");
             return false;
         } else {
+            // надо закрасить на основной доске
             return true;
         }
     }
@@ -77,7 +92,7 @@ public class Algo {
     private XY findFirstFreePoint(EntityType[][] busy) {
         for (int y = 0; y < busy.length; y++) {
             for (int x = 0; x < busy[y].length; x++) {
-                if (!busy[y][x].isBusy && busy[y][x] != EntityType.FREE_AFTER_BOMB) {
+                if (!busy[y][x].isBusy) {
                     return new XY(x, y);
                 }
             }
@@ -102,6 +117,19 @@ public class Algo {
             log.trace("found item: x: {}, y: {}", newX, newY);
         }
         return res;
+    }
+
+    private void addFreeNear(XY pos, Set<XY> result, EntityType[][] busy) {
+        addFreeNear(pos, 1 ,0, result, busy);
+        addFreeNear(pos, -1 ,0, result, busy);
+        addFreeNear(pos, 0 ,1, result, busy);
+        addFreeNear(pos, 0 ,-1, result, busy);
+    }
+
+    private void addFreeNear(XY pos, int dx, int dy, Set<XY> result, EntityType[][] busy) {
+        if (!busy[pos.y+dy][pos.x + dx].isBusy) {
+            result.add(new XY(pos.x + dx, pos.y+dy));
+        }
     }
 
 }

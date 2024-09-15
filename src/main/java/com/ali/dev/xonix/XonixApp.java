@@ -335,6 +335,9 @@ public class XonixApp extends JFrame implements GameOverListener {
 
         bufferGraphics.drawImage(BonusType.FREEZE.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
         bufferGraphics.drawString("slow down", inputX + 30, yOffset + SIZE * i++);
+
+        bufferGraphics.drawImage(BonusType.BOMB.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
+        bufferGraphics.drawString("bomb", inputX + 30, yOffset + SIZE * i++);
     }
 
     private void paintLegendBall(Graphics2D bufferGraphics, int inputX, int yOffset, int i, int IMAGE_SHIFT, ItemAreaType itemAreaType, ItemType itemType) {
