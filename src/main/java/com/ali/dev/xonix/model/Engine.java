@@ -5,7 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.event.KeyEvent;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.ali.dev.xonix.Config.*;
@@ -158,7 +161,7 @@ public class Engine {
         bonuses.forEach(b -> {
             b.type.apply.accept(state);
             if (b.type.canBeActive) {
-                b.lastTick = state.tickId + state.getCurLevel().getBonusSpawnSec()*1000 / TICK_TIME_MS;
+                b.lastTick = state.tickId + state.getCurLevel().getBonusSpawnSec() * 1000L / TICK_TIME_MS;
                 state.activeBonuses.add(b);
             }
         });

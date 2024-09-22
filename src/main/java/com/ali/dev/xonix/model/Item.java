@@ -45,7 +45,7 @@ public class Item {
         var newCol = calcCol(newX + HALF_CELL);
         var newRow = calcRow(newY + HALF_CELL);
 
-        if (state.checkHeadCollisions(this, newCol, newRow)) {
+        if (state.checkHeadCollisions(newCol, newRow)) {
             return;
         }
 

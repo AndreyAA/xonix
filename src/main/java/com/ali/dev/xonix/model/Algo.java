@@ -3,7 +3,10 @@ package com.ali.dev.xonix.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static com.ali.dev.xonix.Config.GRID_SIZE_X;
@@ -47,8 +50,8 @@ public class Algo {
                 // fill in by blocks
                 isEmptyArea(itemsSet, state.entityGrid, startPoint,
                         (y, x) -> {
-                    state.entityGrid[y][x] = EntityType.BLOCK;
-                    log.debug("mark as block x: {}, y:{}", x ,y);
+                            state.entityGrid[y][x] = EntityType.BLOCK;
+                            log.debug("mark as block x: {}, y:{}", x, y);
                         }
                 );
                 // continue to find next empty area
@@ -60,7 +63,7 @@ public class Algo {
 
     private Set<XY> collectPointsToStartFilling(EntityType[][] busy) {
         Set<XY> result = new HashSet<>();
-        for (XY xy: state.head.getCurPath()) {
+        for (XY xy : state.head.getCurPath()) {
             addFreeNear(xy, result, busy);
         }
         return result;
@@ -120,15 +123,15 @@ public class Algo {
     }
 
     private void addFreeNear(XY pos, Set<XY> result, EntityType[][] busy) {
-        addFreeNear(pos, 1 ,0, result, busy);
-        addFreeNear(pos, -1 ,0, result, busy);
-        addFreeNear(pos, 0 ,1, result, busy);
-        addFreeNear(pos, 0 ,-1, result, busy);
+        addFreeNear(pos, 1, 0, result, busy);
+        addFreeNear(pos, -1, 0, result, busy);
+        addFreeNear(pos, 0, 1, result, busy);
+        addFreeNear(pos, 0, -1, result, busy);
     }
 
     private void addFreeNear(XY pos, int dx, int dy, Set<XY> result, EntityType[][] busy) {
-        if (!busy[pos.y+dy][pos.x + dx].isBusy) {
-            result.add(new XY(pos.x + dx, pos.y+dy));
+        if (!busy[pos.y + dy][pos.x + dx].isBusy) {
+            result.add(new XY(pos.x + dx, pos.y + dy));
         }
     }
 

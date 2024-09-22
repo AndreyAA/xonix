@@ -10,28 +10,34 @@ import java.util.function.Consumer;
 public enum BonusType {
     LIFE("increase life",
             s -> s.lifes++,
-            s -> {},
+            s -> {
+            },
             Images.bonusLife,
             false,
-            (s, b) -> {},
+            (s, b) -> {
+            },
             true, true),
     HEAD_SPEED_UP("speed up head",
             s -> s.head.velocity = 2,
             s -> s.head.velocity = 1,
             Images.speedUp,
             true,
-            (s, b) -> {},
+            (s, b) -> {
+            },
             true, false),
     SLOW_DOWN("slow down enemies",
             s -> s.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(Item::slowDown),
             s -> s.items.stream().filter(i -> i.area == ItemAreaType.InField).forEach(Item::restore),
             Images.freeze,
             true,
-            (s, b) -> {},
+            (s, b) -> {
+            },
             true, false),
     BOMB("bomb",
-            s -> {},
-            s -> {},
+            s -> {
+            },
+            s -> {
+            },
             Images.bomb,
             false,
             (s, b) -> {

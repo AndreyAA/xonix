@@ -10,8 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.*;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import static com.ali.dev.xonix.Config.*;
@@ -23,6 +25,8 @@ public class State {
 
 
     public EntityType[][] entityGrid;
+    // items
+    protected List<Item> items = new ArrayList<>();
     long tickId = 0;
     long nextLevelTick = 0;
     int score = 0;
@@ -30,9 +34,6 @@ public class State {
     boolean isPause;
     boolean isDebug;
     int curLevel;
-
-    // items
-    protected List<Item> items = new ArrayList<>();
     EntityType[][] checkingBusy;
     Head head = new Head();
     List<Bonus> bonuses = new ArrayList<>();
@@ -50,8 +51,12 @@ public class State {
         this.levels = levels;
     }
 
-    public void setLifes(int lifes) {
-        this.lifes = lifes;
+    private static List<Score> readScoreFile(Path path) throws IOException {
+        return Files.readAllLines(path)
+                .stream().map(str -> str.split(";"))
+                .map(strArr -> new Score(strArr[0], Integer.parseInt(strArr[1])))
+                .sorted(Comparator.comparing(Score::getScore).reversed())
+                .collect(Collectors.toList());
     }
 
     public List<Score> getTopScores() {
@@ -129,7 +134,11 @@ public class State {
         return levels.get(curLevel);
     }
 
-    public boolean checkHeadCollisions(Item item, int x, int y) {
+    public void setCurLevel(int curLevel) {
+        this.curLevel = curLevel;
+    }
+
+    public boolean checkHeadCollisions(int x, int y) {
         XY pos = new XY(x, y);
         if (head.curPath.contains(pos)
                 || (head.pos.x == x && head.pos.y == y)) {
@@ -147,7 +156,7 @@ public class State {
         head.curPath.clear();
         head.pos = (head.startPoint != null) ? head.startPoint : new XY(GRID_SIZE_X / 2, 0);
         head.shift = XY.STOP;
-        activeBonuses.stream().forEach(b -> b.type.restore.accept(this));
+        activeBonuses.forEach(b -> b.type.restore.accept(this));
         activeBonuses.clear();
         lifes--;
     }
@@ -198,7 +207,7 @@ public class State {
 
     public boolean inSliders(int x, int y) {
         return getCurLevel().getAreas().stream()
-                .filter(a->a.getType().equals("slider"))
+                .filter(a -> a.getType().equals("slider"))
                 .anyMatch(sl -> sl.contains(x, y));
     }
 
@@ -294,14 +303,6 @@ public class State {
         this.topScores = readScoreFile(path);
     }
 
-    private static List<Score> readScoreFile(Path path) throws IOException {
-        return Files.readAllLines(path)
-                .stream().map(str -> str.split(";"))
-                .map(strArr -> new Score(strArr[0], Integer.parseInt(strArr[1])))
-                .sorted(Comparator.comparing(Score::getScore).reversed())
-                .collect(Collectors.toList());
-    }
-
     public boolean isEnterName() {
         return enterName;
     }
@@ -319,15 +320,15 @@ public class State {
         return lifes;
     }
 
+    public void setLifes(int lifes) {
+        this.lifes = lifes;
+    }
+
     public boolean isPause() {
         return isPause;
     }
 
     public boolean isReadyForNewLevel() {
         return isReadyForNewLevel;
-    }
-
-    public void setCurLevel(int curLevel) {
-        this.curLevel = curLevel;
     }
 }

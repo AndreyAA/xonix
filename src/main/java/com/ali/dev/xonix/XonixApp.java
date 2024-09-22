@@ -8,9 +8,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 import static com.ali.dev.xonix.Config.*;
 
@@ -72,7 +76,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         requestFocus();
     }
 
-    private static java.util.List<Level> readLevels(String path, InputStream inputStream ) throws IOException {
+    private static java.util.List<Level> readLevels(String path, InputStream inputStream) throws IOException {
 
         if (inputStream == null) {
             throw new IllegalArgumentException("file not found: " + path);
@@ -84,41 +88,6 @@ public class XonixApp extends JFrame implements GameOverListener {
         log.info("read levels: {}", levels.size());
         return levels;
     }
-
-    private void processEscapeKey() {
-        state.setGameOver(false);
-        state.setEnterName(false);
-        state.setLifes(INIT_LIFES);
-        state.thisLevel();
-    }
-
-    private void processEnterName() {
-        if (nameInput.length() >= YOU_NAME.length() + NAME_MIN_LENGTH) {
-            state.addScore(nameInput.substring(YOU_NAME.length()));
-            nameInput.delete(0, nameInput.length());
-            state.setEnterName(false);
-            try {
-                state.storeScores();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-    }
-
-    private void startKeyboardThread() {
-        Runnable keyboardThread = () -> {
-            while (true) {
-                keyboard.poll();
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-        new Thread(keyboardThread).start();
-    }
-
 
     private static void paintRect(Graphics2D g2d, int x, int y) {
         g2d.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
@@ -193,13 +162,13 @@ public class XonixApp extends JFrame implements GameOverListener {
 
     private static InputStream getLevelsInputStream(String filePath) throws FileNotFoundException {
         InputStream inputStream;
-        if (filePath!=null) {
+        if (filePath != null) {
             inputStream = new FileInputStream(filePath);
             log.info("load levels from file: {}", filePath);
         } else {
             ClassLoader classLoader = Images.class.getClassLoader();
             // Get the resource as an InputStream
-             inputStream = classLoader.getResourceAsStream(LEVELS_PATH);
+            inputStream = classLoader.getResourceAsStream(LEVELS_PATH);
         }
         return inputStream;
     }
@@ -218,6 +187,59 @@ public class XonixApp extends JFrame implements GameOverListener {
 
     public static int calcY(int row) {
         return row * CELL_SIZE + MIN_Y;
+    }
+
+    private static void createSplashScreen() {
+        splashFrame = new JFrame();
+        splashFrame.setUndecorated(true);
+        splashFrame.setSize(400, 300);
+        splashFrame.setLocationRelativeTo(null);
+
+        JPanel splashPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                ImageIcon icon = new ImageIcon(Images.splash);
+                g.drawImage(icon.getImage(), 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
+        splashFrame.add(splashPanel);
+        splashFrame.setVisible(true);
+    }
+
+    private void processEscapeKey() {
+        state.setGameOver(false);
+        state.setEnterName(false);
+        state.setLifes(INIT_LIFES);
+        state.thisLevel();
+    }
+
+    private void processEnterName() {
+        if (nameInput.length() >= YOU_NAME.length() + NAME_MIN_LENGTH) {
+            state.addScore(nameInput.substring(YOU_NAME.length()));
+            nameInput.delete(0, nameInput.length());
+            state.setEnterName(false);
+            try {
+                state.storeScores();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
+    private void startKeyboardThread() {
+        Runnable keyboardThread = () -> {
+            while (true) {
+                keyboard.poll();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+        new Thread(keyboardThread).start();
     }
 
     @Override
@@ -262,7 +284,7 @@ public class XonixApp extends JFrame implements GameOverListener {
 
         // Устанавливаем стиль линии
         switchOnSlidersStrikes();
-        state.getCurLevel().getAreas().stream().filter(a->a.getType().equals("slider")).forEach(sl -> {
+        state.getCurLevel().getAreas().stream().filter(a -> a.getType().equals("slider")).forEach(sl -> {
             bufferGraphics.drawRect(sl.getX(), sl.getY(), sl.getWidth(), sl.getHeight());
         });
         switchOffSlidersStrikes();
@@ -365,7 +387,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         i += 3;
         bufferGraphics.drawString("Bonuses:", inputX, yOffset + SIZE * i++);
 
-        for (BonusType type: BonusType.values()) {
+        for (BonusType type : BonusType.values()) {
             bufferGraphics.drawImage(type.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
             bufferGraphics.drawString(type.name, inputX + 30, yOffset + SIZE * i++);
         }
@@ -427,24 +449,5 @@ public class XonixApp extends JFrame implements GameOverListener {
         // restore
         nameInput.delete(0, nameInput.length());
         nameInput.append(YOU_NAME);
-    }
-
-    private static void createSplashScreen() {
-        splashFrame = new JFrame();
-        splashFrame.setUndecorated(true);
-        splashFrame.setSize(400, 300);
-        splashFrame.setLocationRelativeTo(null);
-
-        JPanel splashPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                ImageIcon icon = new ImageIcon(Images.splash);
-                g.drawImage(icon.getImage(), 0, 0, getWidth(), getHeight(), this);
-            }
-        };
-
-        splashFrame.add(splashPanel);
-        splashFrame.setVisible(true);
     }
 }
