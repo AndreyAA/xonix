@@ -131,7 +131,7 @@ public class State {
 
     public boolean checkHeadCollisions(Item item, int x, int y) {
         XY pos = new XY(x, y);
-        if ((head.curPath.contains(pos) && item.getArea() != ItemAreaType.OutFiled)
+        if (head.curPath.contains(pos)
                 || (head.pos.x == x && head.pos.y == y)) {
             failHead();
             return true;

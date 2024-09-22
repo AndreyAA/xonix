@@ -147,6 +147,7 @@ public class Engine {
             } else if (!state.entityGrid[newPos.y][newPos.x].isBusy) {
                 log.debug("start moving: {}", state.head.pos);
                 state.head.startPoint = state.head.pos;
+                state.head.curPath.clear();
                 state.head.curPath.add(newPos);
                 state.markBorder(newPos.y, newPos.x, true, EntityType.BLOCK);
             }
