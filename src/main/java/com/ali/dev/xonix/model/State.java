@@ -205,9 +205,9 @@ public class State {
         entityGrid[i][x] = border;
     }
 
-    public boolean inSliders(int x, int y) {
+    public boolean inArea(String areaType, int x, int y) {
         return getCurLevel().getAreas().stream()
-                .filter(a -> a.getType().equals("slider"))
+                .filter(a -> a.getType().equals(areaType))
                 .anyMatch(sl -> sl.contains(x, y));
     }
 

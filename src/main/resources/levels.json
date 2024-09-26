@@ -43,8 +43,15 @@
     ],
     "areas": [
       {
-        "type": "slider",
+        "features": [{"slider"}],
         "x": 300,
+        "y": 300,
+        "width": 200,
+        "height": 200
+      },
+      {
+        "type": "slowdown",
+        "x": 600,
         "y": 300,
         "width": 200,
         "height": 200

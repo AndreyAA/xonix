@@ -59,7 +59,7 @@ public class Engine {
         int x = calcX(state.head.pos.x);
         int y = calcY(state.head.pos.y);
 
-        if (!state.inSliders(x, y)) {
+        if (!state.inArea("slider", x, y)) {
             updateKeys();
         }
 

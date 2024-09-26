@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 
 import java.util.List;
+import java.util.Set;
 
 public class Level {
     int id;
@@ -59,11 +60,11 @@ public class Level {
     }
 
     public static class AreaModel {
-        String type;
+        Set<AreaFeature> features;
         int x, y, width, height;
 
-        public String getType() {
-            return type;
+        public Set<AreaFeature> getFeatures() {
+            return features;
         }
 
         public int getX() {

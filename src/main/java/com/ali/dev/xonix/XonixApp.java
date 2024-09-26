@@ -247,6 +247,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         long start = System.currentTimeMillis();
         // Clear the buffer
         bufferGraphics.clearRect(0, 0, Config.WIDTH, Config.HEIGHT + 120);
+        bufferGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // Draw the grid
         for (int row = 0; row < GRID_SIZE_Y; row++) {
@@ -284,7 +285,29 @@ public class XonixApp extends JFrame implements GameOverListener {
 
         // Устанавливаем стиль линии
         switchOnSlidersStrikes();
-        state.getCurLevel().getAreas().stream().filter(a -> a.getType().equals("slider")).forEach(sl -> {
+        // Создаем текстуру для заштриховки
+        BufferedImage textureImage = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2dTexture = textureImage.createGraphics();
+        g2dTexture.setColor(Color.GRAY);
+        g2dTexture.setStroke(new BasicStroke(2));
+
+//        g2dTexture.drawOval(0,0, 20, 20);
+        g2dTexture.drawLine(0, 20, 20, 0);
+        // Рисуем наклонные линии под углом 45 градусов
+//        for (int i = 0; i < 20; i += 10) {
+
+//            Line(0, i, i + 10, 0);
+            //g2dTexture.drawLine(i, 20, 20, i);
+//        }
+        g2dTexture.dispose();
+
+        // Создаем TexturePaint с использованием текстуры
+        TexturePaint texturePaint = new TexturePaint(textureImage, new Rectangle(0, 0, 20, 20));
+
+        // Устанавливаем TexturePaint в качестве заполнения
+        state.getCurLevel().getAreas().stream().forEach(sl -> {
+            bufferGraphics.setPaint(texturePaint);//todo get from area type
+            bufferGraphics.fillRect(sl.getX(), sl.getY(), sl.getWidth(), sl.getHeight());
             bufferGraphics.drawRect(sl.getX(), sl.getY(), sl.getWidth(), sl.getHeight());
         });
         switchOffSlidersStrikes();
