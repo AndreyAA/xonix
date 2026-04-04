@@ -43,6 +43,7 @@ public class State {
     int busyCells;
     boolean isGameOver;
     boolean enterName;
+    boolean lifeLostThisTick;
     List<Score> topScores;
 
     public State(EntityType[][] entityTypes, List<Level> levels) {
@@ -140,6 +141,10 @@ public class State {
     }
 
     public void failHead() {
+        if (lifeLostThisTick) {
+            return;
+        }
+        lifeLostThisTick = true;
         log.debug("fail head");
         head.curPath.forEach(p -> {
             entityGrid[p.y][p.x] = EntityType.FREE;
@@ -150,6 +155,10 @@ public class State {
         activeBonuses.stream().forEach(b -> b.type.restore.accept(this));
         activeBonuses.clear();
         lifes--;
+    }
+
+    public void resetTickFlags() {
+        lifeLostThisTick = false;
     }
 
     public void nextLevel() {

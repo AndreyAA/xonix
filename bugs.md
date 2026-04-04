@@ -24,7 +24,7 @@ File: [src/main/java/com/ali/dev/xonix/model/Engine.java](/home/bob/IdeaProjects
 
 Bonus coordinates are generated in `0..GRID_SIZE_X-3` and `0..GRID_SIZE_Y-3`, which includes the occupied border rows and columns. This allows bonuses to appear in invalid or inaccessible cells.
 
-### 5. Multiple lives can be lost in a single tick
+### 5. `BUG-005`: Multiple lives can be lost in a single tick
 Files:
 - [src/main/java/com/ali/dev/xonix/model/State.java](/home/bob/IdeaProjects/xonix/src/main/java/com/ali/dev/xonix/model/State.java)
 - [src/main/java/com/ali/dev/xonix/model/Engine.java](/home/bob/IdeaProjects/xonix/src/main/java/com/ali/dev/xonix/model/Engine.java)

@@ -31,6 +31,7 @@ public class Engine {
 
     public void tick() {
         long start = System.currentTimeMillis();
+        state.resetTickFlags();
 
         if (keyboard.isPressedOnce(KeyEvent.VK_SPACE)) {
             state.isPause = !state.isPause;
