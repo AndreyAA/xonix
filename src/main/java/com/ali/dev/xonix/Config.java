@@ -23,6 +23,10 @@ public class Config {
     public static final int BUTTON_DELAY_MS = 500;
     public static final int BLINK_EACH_MS = 500;
     public static final Font STATUS_FONT = new Font("Monospaced", Font.PLAIN, 16);
+    public static final Font HUD_LABEL_FONT = new Font("SansSerif", Font.BOLD, 12);
+    public static final Font HUD_VALUE_FONT = new Font("SansSerif", Font.BOLD, 24);
+    public static final Font HUD_SCORE_FONT = new Font("SansSerif", Font.BOLD, 30);
+    public static final Font HUD_SMALL_FONT = new Font("SansSerif", Font.PLAIN, 13);
     public static final Font TIMER_FONT = new Font("Monospaced", Font.PLAIN, 100);
     public static final Color CLEAR_COLOR = Color.BLACK;
     public static final Color STATUS_COLOR = Color.WHITE;

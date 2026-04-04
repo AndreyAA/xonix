@@ -17,6 +17,18 @@ import static com.ali.dev.xonix.Config.*;
 public class XonixApp extends JFrame implements GameOverListener {
     private static final Logger log = LoggerFactory.getLogger(XonixApp.class);
     private static final int HUD_HEIGHT = 60;
+    private static final int HUD_PANEL_X = 16;
+    private static final int HUD_FIELD_GAP = 6;
+    private static final int HUD_PANEL_Y = 6;
+    private static final int HUD_PANEL_HEIGHT = MIN_Y - HUD_PANEL_Y - HUD_FIELD_GAP;
+    private static final int HUD_PANEL_ARC = 20;
+    private static final Color HUD_PANEL_COLOR = new Color(12, 16, 22, 215);
+    private static final Color HUD_BORDER_COLOR = new Color(255, 255, 255, 70);
+    private static final Color HUD_MUTED_COLOR = new Color(173, 186, 199);
+    private static final Color HUD_ACCENT_COLOR = new Color(74, 226, 196);
+    private static final Color HUD_TARGET_COLOR = new Color(255, 196, 77);
+    private static final Color HUD_DANGER_COLOR = new Color(255, 96, 96);
+    private static final Color HUD_BONUS_BG = new Color(255, 255, 255, 28);
     private static final Dimension LOGICAL_SCREEN_SIZE = new Dimension(Config.WIDTH, Config.HEIGHT + HUD_HEIGHT);
     private static JFrame splashFrame;
     private final KeyboardInput keyboard = new KeyboardInput();
@@ -389,19 +401,7 @@ public class XonixApp extends JFrame implements GameOverListener {
     }
 
     private void printStatus(Graphics2D graphics) {
-        graphics.setFont(STATUS_FONT);
-        graphics.setColor(STATUS_COLOR);
-        graphics.drawString("Lifes: " + state.getLifes(), 20, 60);
-        graphics.drawString("Score: " + state.getScore(), 120, 60);
-        graphics.drawString("Progress: " + String.format("%6.2f", state.getProgress() * 100), 450, 60);
-        graphics.drawString("Target: " +
-                String.format("%6.2f", state.getCurLevel().getTarget()), 650, 60);
-
-        state.getActiveBonuses().forEach(b -> {
-            if (needPaint(b)) {
-                graphics.drawImage(b.type.image, calcX(GRID_SIZE_X - 5 + b.type.ordinal()), calcY(0) - 2 * CELL_SIZE, null);
-            }
-        });
+        paintHud(graphics);
     }
 
     private void paintOverlay(Graphics2D graphics) {
@@ -425,6 +425,110 @@ public class XonixApp extends JFrame implements GameOverListener {
         if (state.isPause()) {
             paintPauseArea(graphics);
         }
+    }
+
+    private void paintHud(Graphics2D graphics) {
+        int panelWidth = Config.WIDTH - HUD_PANEL_X * 2;
+        graphics.setColor(HUD_PANEL_COLOR);
+        graphics.fillRoundRect(HUD_PANEL_X, HUD_PANEL_Y, panelWidth, HUD_PANEL_HEIGHT, HUD_PANEL_ARC, HUD_PANEL_ARC);
+        graphics.setColor(HUD_BORDER_COLOR);
+        graphics.drawRoundRect(HUD_PANEL_X, HUD_PANEL_Y, panelWidth, HUD_PANEL_HEIGHT, HUD_PANEL_ARC, HUD_PANEL_ARC);
+
+        paintLivesBlock(graphics, HUD_PANEL_X + 18, HUD_PANEL_Y + 16);
+        paintScoreBlock(graphics, HUD_PANEL_X + 220, HUD_PANEL_Y + 14);
+        paintObjectiveBlock(graphics, HUD_PANEL_X + 520, HUD_PANEL_Y + 16);
+        paintBonusesBlock(graphics, Config.WIDTH - 248, HUD_PANEL_Y + 12);
+    }
+
+    private void paintLivesBlock(Graphics2D graphics, int x, int y) {
+        drawLabel(graphics, "LIVES", x, y);
+        for (int i = 0; i < state.getLifes(); i++) {
+            graphics.drawImage(BonusType.LIFE.image, x + i * 24, y + 10, 18, 18, null);
+        }
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(state.getLifes() <= 1 ? HUD_DANGER_COLOR : HUD_MUTED_COLOR);
+        graphics.drawString("LEVEL " + (state.getCurLevelNumber() + 1), x, y + 42);
+        graphics.drawString(state.getLifes() + " remaining", x + 88, y + 25);
+    }
+
+    private void paintScoreBlock(Graphics2D graphics, int x, int y) {
+        drawLabel(graphics, "SCORE", x, y);
+        graphics.setFont(HUD_SCORE_FONT);
+        graphics.setColor(STATUS_COLOR);
+        graphics.drawString(String.valueOf(state.getScore()), x, y + 30);
+        paintProgressBar(graphics, x, y + 40, 250, 12);
+    }
+
+    private void paintObjectiveBlock(Graphics2D graphics, int x, int y) {
+        drawLabel(graphics, "OBJECTIVE", x, y);
+        graphics.setFont(HUD_VALUE_FONT);
+        graphics.setColor(HUD_ACCENT_COLOR);
+        graphics.drawString(String.format("%5.1f%%", state.getProgress() * 100), x, y + 24);
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(HUD_TARGET_COLOR);
+        graphics.drawString("Target " + String.format("%4.1f%%", state.getCurLevel().getTarget()), x, y + 44);
+    }
+
+    private void paintBonusesBlock(Graphics2D graphics, int x, int y) {
+        drawLabel(graphics, "ACTIVE", x, y);
+        if (state.getActiveBonuses().isEmpty()) {
+            graphics.setFont(HUD_SMALL_FONT);
+            graphics.setColor(HUD_MUTED_COLOR);
+            graphics.drawString("No active bonuses", x, y + 24);
+            return;
+        }
+
+        int chipX = x;
+        for (Bonus bonus : state.getActiveBonuses()) {
+            if (!needPaint(bonus)) {
+                continue;
+            }
+            paintBonusChip(graphics, chipX, y + 8, bonus);
+            chipX += 72;
+        }
+    }
+
+    private void paintBonusChip(Graphics2D graphics, int x, int y, Bonus bonus) {
+        graphics.setColor(HUD_BONUS_BG);
+        graphics.fillRoundRect(x, y, 64, 38, 14, 14);
+        graphics.setColor(HUD_BORDER_COLOR);
+        graphics.drawRoundRect(x, y, 64, 38, 14, 14);
+        graphics.drawImage(bonus.type.image, x + 8, y + 9, 18, 18, null);
+
+        int ticksLeft = Math.max(0, (int) (bonus.lastTick - state.getTickId()));
+        double durationTicks = Math.max(1, state.getCurLevel().getBonusSpawnSec() * 1000.0 / TICK_TIME_MS);
+        int barWidth = (int) Math.round(28 * Math.min(1.0, ticksLeft / durationTicks));
+
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(STATUS_COLOR);
+        graphics.drawString(String.valueOf(ticksLeft * TICK_TIME_MS / 1000), x + 34, y + 20);
+        graphics.setColor(HUD_MUTED_COLOR);
+        graphics.drawString("s", x + 47, y + 20);
+        graphics.setColor(HUD_ACCENT_COLOR);
+        graphics.fillRoundRect(x + 28, y + 26, barWidth, 5, 5, 5);
+    }
+
+    private void paintProgressBar(Graphics2D graphics, int x, int y, int width, int height) {
+        graphics.setColor(new Color(255, 255, 255, 26));
+        graphics.fillRoundRect(x, y, width, height, height, height);
+
+        int progressWidth = (int) Math.round(width * Math.max(0, Math.min(1, state.getProgress())));
+        graphics.setColor(HUD_ACCENT_COLOR);
+        graphics.fillRoundRect(x, y, progressWidth, height, height, height);
+
+        int targetX = x + (int) Math.round(width * Math.max(0, Math.min(1, state.getCurLevel().getTarget() / 100.0)));
+        graphics.setColor(HUD_TARGET_COLOR);
+        graphics.fillRoundRect(targetX - 2, y - 2, 4, height + 4, 4, 4);
+
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(HUD_MUTED_COLOR);
+        graphics.drawString(String.format("%.1f%% secured", state.getProgress() * 100), x, y + 25);
+    }
+
+    private void drawLabel(Graphics2D graphics, String label, int x, int y) {
+        graphics.setFont(HUD_LABEL_FONT);
+        graphics.setColor(HUD_MUTED_COLOR);
+        graphics.drawString(label, x, y);
     }
 
     private void drawShape(Graphics2D g2d, int row, int col, EntityType entityType) {
