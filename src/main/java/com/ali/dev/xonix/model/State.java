@@ -293,17 +293,47 @@ public class State {
 
         if (!Files.exists(path)) {
             Files.createFile(path);
-            Files.write(path, List.of("***;0", "***;0", "***;0", "***;0", "***;0", "***;0", "***;0"));
+            Files.write(path, defaultScoreLines());
         }
         this.topScores = readScoreFile(path);
     }
 
-    private static List<Score> readScoreFile(Path path) throws IOException {
-        return Files.readAllLines(path)
-                .stream().map(str -> str.split(";"))
-                .map(strArr -> new Score(strArr[0], Integer.parseInt(strArr[1])))
+    private List<String> defaultScoreLines() {
+        return List.of("***;0", "***;0", "***;0", "***;0", "***;0", "***;0", "***;0");
+    }
+
+    private List<Score> readScoreFile(Path path) throws IOException {
+        List<Score> parsedScores = Files.readAllLines(path)
+                .stream()
+                .map(this::parseScore)
+                .flatMap(Optional::stream)
                 .sorted(Comparator.comparing(Score::getScore).reversed())
-                .collect(Collectors.toList());
+                .limit(7)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        while (parsedScores.size() < 7) {
+            parsedScores.add(new Score("***", 0));
+        }
+        return parsedScores;
+    }
+
+    private Optional<Score> parseScore(String line) {
+        if (line == null || line.isBlank()) {
+            return Optional.empty();
+        }
+
+        String[] scoreParts = line.split(";", 2);
+        if (scoreParts.length != 2) {
+            log.warn("skip malformed score entry: {}", line);
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.of(new Score(scoreParts[0], Integer.parseInt(scoreParts[1])));
+        } catch (NumberFormatException ex) {
+            log.warn("skip score entry with invalid value: {}", line);
+            return Optional.empty();
+        }
     }
 
     public boolean isEnterName() {

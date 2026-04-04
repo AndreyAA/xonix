@@ -14,7 +14,7 @@ File: [src/main/java/com/ali/dev/xonix/model/State.java](/home/bob/IdeaProjects/
 
 ## Medium
 
-### 3. Corrupted or empty `scores.txt` breaks startup
+### 3. `BUG-003`: Corrupted or empty `scores.txt` breaks startup
 File: [src/main/java/com/ali/dev/xonix/model/State.java](/home/bob/IdeaProjects/xonix/src/main/java/com/ali/dev/xonix/model/State.java)
 
 `readScoreFile()` assumes every line has the format `name;score` and parses without validation. Empty lines, partial writes, or manual edits can cause `ArrayIndexOutOfBoundsException` or `NumberFormatException` during startup.
