@@ -258,42 +258,26 @@ public class XonixApp extends JFrame implements GameOverListener {
         // Draw the highlighted cell
         highLightCell(Color.YELLOW, state.getHead().getPos().getX(), state.getHead().getPos().getY());
 
-        printStatus();
-
-        if (state.isReadyForNewLevel()) {
-            bufferGraphics.setColor(Color.WHITE);
-            bufferGraphics.setFont(TIMER_FONT);
-            String mes = "Next Level: ";
-            bufferGraphics.drawString(mes + (state.getCurLevelNumber() + 2), Config.WIDTH / 2 - mes.length() * bufferGraphics.getFont().getSize() / 3, Config.HEIGHT / 2);
-        }
-
         // Устанавливаем стиль линии
-        switchOnSlidersStrikes();
+        switchOnSlidersStrikes(bufferGraphics);
         state.getCurLevel().getAreas().stream().filter(a->a.getType().equals("slider")).forEach(sl -> {
             bufferGraphics.drawRect(sl.getX(), sl.getY(), sl.getWidth(), sl.getHeight());
         });
-        switchOffSlidersStrikes();
-
-        if (state.isGameOver()) {
-            paintGameOverArea(bufferGraphics);
-        }
-
-        if (state.isPause()) {
-            paintPauseArea(bufferGraphics);
-        }
+        switchOffSlidersStrikes(bufferGraphics);
         int timePaint = (int) (System.currentTimeMillis() - start);
         if (timePaint > 10) {
             log.debug("time paint: {} ms", timePaint);
         }
     }
 
-    private void switchOnSlidersStrikes() {
-        bufferGraphics.setColor(Color.cyan);
-        bufferGraphics.setStroke(DASHED_STROKE);
+    private void switchOnSlidersStrikes(Graphics2D graphics) {
+        graphics.setColor(Color.cyan);
+        graphics.setStroke(DASHED_STROKE);
     }
 
-    private void switchOffSlidersStrikes() {
-        bufferGraphics.setColor(Color.WHITE);
+    private void switchOffSlidersStrikes(Graphics2D graphics) {
+        graphics.setColor(Color.WHITE);
+        graphics.setStroke(new BasicStroke());
     }
 
     private boolean needPaint(Bonus b) {
@@ -361,9 +345,9 @@ public class XonixApp extends JFrame implements GameOverListener {
 
         bufferGraphics.drawString("Areas:", inputX, yOffset + SIZE * i++);
 
-        switchOnSlidersStrikes();
+        switchOnSlidersStrikes(bufferGraphics);
         bufferGraphics.drawRect(inputX, yOffset + SIZE * i - IMAGE_SHIFT, 20, 20);
-        switchOffSlidersStrikes();
+        switchOffSlidersStrikes(bufferGraphics);
         bufferGraphics.drawString("unstoppable", inputX + 30, yOffset + SIZE * i++);
 
         i += 3;
@@ -401,19 +385,46 @@ public class XonixApp extends JFrame implements GameOverListener {
     }
 
     private void printStatus() {
-        bufferGraphics.setFont(STATUS_FONT);
-        bufferGraphics.setColor(STATUS_COLOR);
-        bufferGraphics.drawString("Lifes: " + state.getLifes(), 20, 60);
-        bufferGraphics.drawString("Score: " + state.getScore(), 120, 60);
-        bufferGraphics.drawString("Progress: " + String.format("%6.2f", state.getProgress() * 100), 450, 60);
-        bufferGraphics.drawString("Target: " +
+        printStatus(bufferGraphics);
+    }
+
+    private void printStatus(Graphics2D graphics) {
+        graphics.setFont(STATUS_FONT);
+        graphics.setColor(STATUS_COLOR);
+        graphics.drawString("Lifes: " + state.getLifes(), 20, 60);
+        graphics.drawString("Score: " + state.getScore(), 120, 60);
+        graphics.drawString("Progress: " + String.format("%6.2f", state.getProgress() * 100), 450, 60);
+        graphics.drawString("Target: " +
                 String.format("%6.2f", state.getCurLevel().getTarget()), 650, 60);
 
         state.getActiveBonuses().forEach(b -> {
             if (needPaint(b)) {
-                bufferGraphics.drawImage(b.type.image, calcX(GRID_SIZE_X - 5 + b.type.ordinal()), calcY(0) - 2 * CELL_SIZE, null);
+                graphics.drawImage(b.type.image, calcX(GRID_SIZE_X - 5 + b.type.ordinal()), calcY(0) - 2 * CELL_SIZE, null);
             }
         });
+    }
+
+    private void paintOverlay(Graphics2D graphics) {
+        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        printStatus(graphics);
+
+        if (state.isReadyForNewLevel()) {
+            graphics.setColor(Color.WHITE);
+            graphics.setFont(TIMER_FONT);
+            String mes = "Next Level: ";
+            graphics.drawString(mes + (state.getCurLevelNumber() + 2),
+                    Config.WIDTH / 2 - mes.length() * graphics.getFont().getSize() / 3,
+                    Config.HEIGHT / 2);
+        }
+
+        if (state.isGameOver()) {
+            paintGameOverArea(graphics);
+        }
+
+        if (state.isPause()) {
+            paintPauseArea(graphics);
+        }
     }
 
     private void drawShape(Graphics2D g2d, int row, int col, EntityType entityType) {
@@ -485,6 +496,15 @@ public class XonixApp extends JFrame implements GameOverListener {
                 int offsetY = (getHeight() - scaledHeight) / 2;
 
                 g2d.drawImage(buffer, offsetX, offsetY, scaledWidth, scaledHeight, null);
+
+                Graphics2D overlayGraphics = (Graphics2D) g2d.create();
+                try {
+                    overlayGraphics.translate(offsetX, offsetY);
+                    overlayGraphics.scale(scale, scale);
+                    paintOverlay(overlayGraphics);
+                } finally {
+                    overlayGraphics.dispose();
+                }
             } finally {
                 g2d.dispose();
             }
