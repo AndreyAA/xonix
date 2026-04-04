@@ -60,20 +60,22 @@ public class Item {
                 shift = new XY(-1 * shift.x, shift.y);
             }
         } else {
-            boolean isBusy = state.entityGrid[newRow][curCol].isBusy;
-            if (newRow < 0 || newRow >= state.entityGrid.length || isBusy) {
+            boolean outOfVerticalBounds = newRow < 0 || newRow >= state.entityGrid.length;
+            boolean isBusy = !outOfVerticalBounds && state.entityGrid[newRow][curCol].isBusy;
+            if (outOfVerticalBounds || isBusy) {
                 // Отражение по вертикали
-                if (type == ItemType.DESTROYER && state.entityGrid[newRow][curCol].isDestroyable) {
+                if (!outOfVerticalBounds && type == ItemType.DESTROYER && state.entityGrid[newRow][curCol].isDestroyable) {
                     state.entityGrid[newRow][curCol] = EntityType.FREE;
                     state.busyCells--;
                 }
                 shift = new XY(shift.x, -1 * shift.y);
             }
 
-            boolean isBusy2 = state.entityGrid[curRow][newCol].isBusy;
-            if (newCol < 0 || newCol >= state.entityGrid[0].length || isBusy2) {
+            boolean outOfHorizontalBounds = newCol < 0 || newCol >= state.entityGrid[0].length;
+            boolean isBusy2 = !outOfHorizontalBounds && state.entityGrid[curRow][newCol].isBusy;
+            if (outOfHorizontalBounds || isBusy2) {
                 // Отражение по горизонтали
-                if (type == ItemType.DESTROYER && state.entityGrid[curRow][newCol].isDestroyable) {
+                if (!outOfHorizontalBounds && type == ItemType.DESTROYER && state.entityGrid[curRow][newCol].isDestroyable) {
                     state.entityGrid[curRow][newCol] = EntityType.FREE;
                     state.busyCells--;
                 }
