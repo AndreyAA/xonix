@@ -16,10 +16,13 @@ import static com.ali.dev.xonix.Config.*;
 
 public class XonixApp extends JFrame implements GameOverListener {
     private static final Logger log = LoggerFactory.getLogger(XonixApp.class);
+    private static final int HUD_HEIGHT = 60;
+    private static final Dimension LOGICAL_SCREEN_SIZE = new Dimension(Config.WIDTH, Config.HEIGHT + HUD_HEIGHT);
     private static JFrame splashFrame;
     private final KeyboardInput keyboard = new KeyboardInput();
     private final BufferedImage buffer;
     private final Graphics2D bufferGraphics;
+    private final GamePanel gamePanel;
     private final State state;
     private final Engine engine;
     private final Timer timer;
@@ -27,25 +30,40 @@ public class XonixApp extends JFrame implements GameOverListener {
 
     public XonixApp(java.util.List<Level> levels, int curLevel) throws IOException {
         setTitle("Xonix");
-        setSize(Config.WIDTH, Config.HEIGHT + 60); // Adjusted for the new panel position
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
 
         state = new State(new EntityType[GRID_SIZE_Y][GRID_SIZE_X], levels);
         state.setCurLevel(curLevel);
         state.readScores();
         state.initData();
 
-        buffer = new BufferedImage(Config.WIDTH, Config.HEIGHT + 60, BufferedImage.TYPE_INT_RGB);
+        buffer = new BufferedImage(LOGICAL_SCREEN_SIZE.width, LOGICAL_SCREEN_SIZE.height, BufferedImage.TYPE_INT_RGB);
         bufferGraphics = buffer.createGraphics();
         bufferGraphics.setBackground(CLEAR_COLOR);
+        gamePanel = new GamePanel();
+        gamePanel.setPreferredSize(LOGICAL_SCREEN_SIZE);
+        setContentPane(gamePanel);
 
         engine = new Engine(state, keyboard, this);
 
         startKeyboardThread();
-        addKeyListener(keyboard);
+        registerInputHandlers(gamePanel);
 
-        addKeyListener(new KeyAdapter() {
+        timer = new Timer(Config.TICK_TIME_MS, e -> {
+            SwingUtilities.invokeLater(engine::tick);
+            gamePanel.repaint();
+        });
+        timer.start();
+
+        pack();
+        setMinimumSize(LOGICAL_SCREEN_SIZE);
+        setLocationRelativeTo(null);
+    }
+
+    private void registerInputHandlers(JComponent component) {
+        component.setFocusable(true);
+        component.addKeyListener(keyboard);
+        component.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (state.isGameOver()) {
@@ -61,15 +79,6 @@ public class XonixApp extends JFrame implements GameOverListener {
                 }
             }
         });
-
-        timer = new Timer(Config.TICK_TIME_MS, e -> {
-            SwingUtilities.invokeLater(engine::tick);
-            repaint();
-        });
-        timer.start();
-
-        setFocusable(true);
-        requestFocus();
     }
 
     private static java.util.List<Level> readLevels(String path, InputStream inputStream ) throws IOException {
@@ -185,6 +194,7 @@ public class XonixApp extends JFrame implements GameOverListener {
             try {
                 app = new XonixApp(levels, curLevel);
                 app.setVisible(true);
+                app.gamePanel.requestFocusInWindow();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -220,13 +230,10 @@ public class XonixApp extends JFrame implements GameOverListener {
         return row * CELL_SIZE + MIN_Y;
     }
 
-    @Override
-    public void paint(Graphics g) {
+    private void renderFrame() {
         long start = System.currentTimeMillis();
-        // Clear the buffer
-        bufferGraphics.clearRect(0, 0, Config.WIDTH, Config.HEIGHT + 120);
+        bufferGraphics.clearRect(0, 0, buffer.getWidth(), buffer.getHeight());
 
-        // Draw the grid
         for (int row = 0; row < GRID_SIZE_Y; row++) {
             for (int col = 0; col < GRID_SIZE_X; col++) {
                 if (state.entityGrid[row][col] != null) {
@@ -274,9 +281,6 @@ public class XonixApp extends JFrame implements GameOverListener {
         if (state.isPause()) {
             paintPauseArea(bufferGraphics);
         }
-
-        // Draw the buffer on the screen
-        g.drawImage(buffer, 0, 0, this);
         int timePaint = (int) (System.currentTimeMillis() - start);
         if (timePaint > 10) {
             log.debug("time paint: {} ms", timePaint);
@@ -453,5 +457,37 @@ public class XonixApp extends JFrame implements GameOverListener {
 
         splashFrame.add(splashPanel);
         splashFrame.setVisible(true);
+    }
+
+    private final class GamePanel extends JPanel {
+
+        private GamePanel() {
+            setBackground(CLEAR_COLOR);
+            setDoubleBuffered(true);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            renderFrame();
+
+            Graphics2D g2d = (Graphics2D) g.create();
+            try {
+                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+
+                double scale = Math.min(
+                        getWidth() / (double) LOGICAL_SCREEN_SIZE.width,
+                        getHeight() / (double) LOGICAL_SCREEN_SIZE.height
+                );
+                int scaledWidth = Math.max(1, (int) Math.round(LOGICAL_SCREEN_SIZE.width * scale));
+                int scaledHeight = Math.max(1, (int) Math.round(LOGICAL_SCREEN_SIZE.height * scale));
+                int offsetX = (getWidth() - scaledWidth) / 2;
+                int offsetY = (getHeight() - scaledHeight) / 2;
+
+                g2d.drawImage(buffer, offsetX, offsetY, scaledWidth, scaledHeight, null);
+            } finally {
+                g2d.dispose();
+            }
+        }
     }
 }
