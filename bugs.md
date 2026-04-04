@@ -7,7 +7,7 @@ File: [src/main/java/com/ali/dev/xonix/model/Item.java](/home/bob/IdeaProjects/x
 
 In-field enemy movement reads `state.entityGrid[newRow][curCol]` and `state.entityGrid[curRow][newCol]` before validating that `newRow` and `newCol` are within bounds. When an enemy steps beyond a border, the game can crash before bounce logic runs.
 
-### 2. Crash after completing the last level
+### 2. `BUG-002`: Crash after completing the last level
 File: [src/main/java/com/ali/dev/xonix/model/State.java](/home/bob/IdeaProjects/xonix/src/main/java/com/ali/dev/xonix/model/State.java)
 
 `nextLevel()` increments `curLevel` and immediately calls `thisLevel()`. On the final level, the next access to `levels.get(curLevel)` throws `IndexOutOfBoundsException` instead of ending the game gracefully.

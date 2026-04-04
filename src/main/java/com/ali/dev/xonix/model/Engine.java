@@ -48,7 +48,11 @@ public class Engine {
             if (state.tickId < state.nextLevelTick) {
                 return;
             } else {
-                state.nextLevel();
+                if (state.hasNextLevel()) {
+                    state.nextLevel();
+                } else {
+                    gameOverEvent();
+                }
                 return;
             }
         }

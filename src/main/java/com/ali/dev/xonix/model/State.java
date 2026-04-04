@@ -157,6 +157,10 @@ public class State {
         thisLevel();
     }
 
+    public boolean hasNextLevel() {
+        return curLevel + 1 < levels.size();
+    }
+
     public int getCurLevelNumber() {
         return curLevel;
     }
