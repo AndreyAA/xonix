@@ -60,11 +60,14 @@ public class Item {
                 shift = new XY(-1 * shift.x, shift.y);
             }
         } else {
+            boolean currentRowOutOfBounds = curRow < 0 || curRow >= state.entityGrid.length;
+            boolean currentColOutOfBounds = curCol < 0 || curCol >= state.entityGrid[0].length;
             boolean outOfVerticalBounds = newRow < 0 || newRow >= state.entityGrid.length;
-            boolean isBusy = !outOfVerticalBounds && state.entityGrid[newRow][curCol].isBusy;
+            boolean isBusy = !outOfVerticalBounds && !currentColOutOfBounds && state.entityGrid[newRow][curCol].isBusy;
             if (outOfVerticalBounds || isBusy) {
                 // Отражение по вертикали
-                if (!outOfVerticalBounds && type == ItemType.DESTROYER && state.entityGrid[newRow][curCol].isDestroyable) {
+                if (!outOfVerticalBounds && !currentColOutOfBounds
+                        && type == ItemType.DESTROYER && state.entityGrid[newRow][curCol].isDestroyable) {
                     state.entityGrid[newRow][curCol] = EntityType.FREE;
                     state.busyCells--;
                 }
@@ -72,10 +75,11 @@ public class Item {
             }
 
             boolean outOfHorizontalBounds = newCol < 0 || newCol >= state.entityGrid[0].length;
-            boolean isBusy2 = !outOfHorizontalBounds && state.entityGrid[curRow][newCol].isBusy;
+            boolean isBusy2 = !outOfHorizontalBounds && !currentRowOutOfBounds && state.entityGrid[curRow][newCol].isBusy;
             if (outOfHorizontalBounds || isBusy2) {
                 // Отражение по горизонтали
-                if (!outOfHorizontalBounds && type == ItemType.DESTROYER && state.entityGrid[curRow][newCol].isDestroyable) {
+                if (!outOfHorizontalBounds && !currentRowOutOfBounds
+                        && type == ItemType.DESTROYER && state.entityGrid[curRow][newCol].isDestroyable) {
                     state.entityGrid[curRow][newCol] = EntityType.FREE;
                     state.busyCells--;
                 }

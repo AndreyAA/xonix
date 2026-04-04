@@ -12,6 +12,11 @@ File: [src/main/java/com/ali/dev/xonix/model/State.java](/home/bob/IdeaProjects/
 
 `nextLevel()` increments `curLevel` and immediately calls `thisLevel()`. On the final level, the next access to `levels.get(curLevel)` throws `IndexOutOfBoundsException` instead of ending the game gracefully.
 
+### 6. `BUG-006`: Secondary out-of-bounds access when current row/column are already invalid
+File: [src/main/java/com/ali/dev/xonix/model/Item.java](/home/bob/IdeaProjects/xonix/src/main/java/com/ali/dev/xonix/model/Item.java)
+
+Even after guarding `newRow` and `newCol`, the movement code can still read `state.entityGrid[curRow][newCol]` or `state.entityGrid[newRow][curCol]` when `curRow` or `curCol` were already pushed out of range by previous movement. This causes another `ArrayIndexOutOfBoundsException` during bounce handling.
+
 ## Medium
 
 ### 3. `BUG-003`: Corrupted or empty `scores.txt` breaks startup
