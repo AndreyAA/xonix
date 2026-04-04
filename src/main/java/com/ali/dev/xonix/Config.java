@@ -27,6 +27,9 @@ public class Config {
     public static final Font HUD_VALUE_FONT = new Font("SansSerif", Font.BOLD, 24);
     public static final Font HUD_SCORE_FONT = new Font("SansSerif", Font.BOLD, 30);
     public static final Font HUD_SMALL_FONT = new Font("SansSerif", Font.PLAIN, 13);
+    public static final Font OVERLAY_TITLE_FONT = new Font("SansSerif", Font.BOLD, 40);
+    public static final Font OVERLAY_BODY_FONT = new Font("SansSerif", Font.PLAIN, 18);
+    public static final Font OVERLAY_INPUT_FONT = new Font("SansSerif", Font.BOLD, 20);
     public static final Font TIMER_FONT = new Font("Monospaced", Font.PLAIN, 100);
     public static final Color CLEAR_COLOR = Color.BLACK;
     public static final Color STATUS_COLOR = Color.WHITE;

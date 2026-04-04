@@ -11,6 +11,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import static com.ali.dev.xonix.Config.*;
 
@@ -29,6 +33,11 @@ public class XonixApp extends JFrame implements GameOverListener {
     private static final Color HUD_TARGET_COLOR = new Color(255, 196, 77);
     private static final Color HUD_DANGER_COLOR = new Color(255, 96, 96);
     private static final Color HUD_BONUS_BG = new Color(255, 255, 255, 28);
+    private static final Color OVERLAY_BACKDROP = new Color(0, 0, 0, 150);
+    private static final Color OVERLAY_PANEL = new Color(18, 22, 30, 235);
+    private static final Color OVERLAY_PANEL_BORDER = new Color(255, 255, 255, 60);
+    private static final DateTimeFormatter GAME_OVER_DATE_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
     private static final Dimension LOGICAL_SCREEN_SIZE = new Dimension(Config.WIDTH, Config.HEIGHT + HUD_HEIGHT);
     private static JFrame splashFrame;
     private final KeyboardInput keyboard = new KeyboardInput();
@@ -39,6 +48,9 @@ public class XonixApp extends JFrame implements GameOverListener {
     private final Engine engine;
     private final Timer timer;
     private final StringBuilder nameInput = new StringBuilder().append(YOU_NAME);
+    private long lastFrameTimestamp = System.currentTimeMillis();
+    private long activePlayTimeMillis;
+    private Long gameOverTimestamp;
 
     public XonixApp(java.util.List<Level> levels, int curLevel) throws IOException {
         setTitle("Xonix");
@@ -62,6 +74,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         registerInputHandlers(gamePanel);
 
         timer = new Timer(Config.TICK_TIME_MS, e -> {
+            updateSessionStats();
             SwingUtilities.invokeLater(engine::tick);
             gamePanel.repaint();
         });
@@ -111,6 +124,7 @@ public class XonixApp extends JFrame implements GameOverListener {
         state.setEnterName(false);
         state.setLifes(INIT_LIFES);
         state.thisLevel();
+        resetSessionStats();
     }
 
     private void processEnterName() {
@@ -123,6 +137,21 @@ public class XonixApp extends JFrame implements GameOverListener {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
+        }
+    }
+
+    private void resetSessionStats() {
+        activePlayTimeMillis = 0;
+        gameOverTimestamp = null;
+        lastFrameTimestamp = System.currentTimeMillis();
+    }
+
+    private void updateSessionStats() {
+        long now = System.currentTimeMillis();
+        long delta = Math.max(0, now - lastFrameTimestamp);
+        lastFrameTimestamp = now;
+        if (!state.isPause() && !state.isGameOver()) {
+            activePlayTimeMillis += delta;
         }
     }
 
@@ -297,91 +326,246 @@ public class XonixApp extends JFrame implements GameOverListener {
     }
 
     private void paintGameOverArea(Graphics2D bufferGraphics) {
-        // Рисуем сообщение "Game Over" и таблицу игроков
-        bufferGraphics.setColor(Color.BLACK);
+        Rectangle panel = createCenteredOverlayPanel(600, 500);
+        paintOverlayCard(bufferGraphics, panel);
 
-        bufferGraphics.fillRect(200, 200, Config.WIDTH - 400, 500);
         bufferGraphics.setColor(Color.WHITE);
-        bufferGraphics.setFont(new Font("Arial", Font.BOLD, 48));
-        bufferGraphics.drawString("Game Over", 400, 200);
+        bufferGraphics.setFont(OVERLAY_TITLE_FONT);
+        drawCenteredString(bufferGraphics, "Game Over", panel.x + panel.width / 2, panel.y + 56);
 
-        bufferGraphics.setFont(new Font("Arial", Font.PLAIN, 24));
-        int yOffset = 300;
-        int inputX = 450;
-        for (int i = 0; i < state.getTopScores().size(); i++) {
-            var score = state.getTopScores().get(i);
-            bufferGraphics.drawString((i + 1) + ". " + score.getName() + ": " + score.getScore(), inputX, yOffset);
-            yOffset += 40;
-        }
+        bufferGraphics.setFont(HUD_SMALL_FONT);
+        bufferGraphics.setColor(HUD_MUTED_COLOR);
+        drawCenteredString(bufferGraphics, "Press ESC to start a new run from the current level set", panel.x + panel.width / 2, panel.y + 82);
 
+        int summaryY = panel.y + 118;
+        paintGameOverSummary(bufferGraphics, panel.x + 34, summaryY, panel.width - 68, 88);
+
+        int scorePanelY = panel.y + 226;
+        paintCurrentScoreSummary(bufferGraphics, panel.x + 34, scorePanelY, panel.width - 68, 64);
+        paintLeaderboard(bufferGraphics, panel.x + 34, scorePanelY + 78, panel.width - 68, 152);
 
         if (state.isEnterName()) {
-            bufferGraphics.setColor(Color.YELLOW);
-            bufferGraphics.drawString(nameInput.toString(), inputX, yOffset);
+            paintNameEntry(bufferGraphics, panel.x + 34, panel.y + panel.height - 88, panel.width - 68, 54);
+        }
+    }
+
+    private void paintGameOverSummary(Graphics2D graphics, int x, int y, int width, int height) {
+        graphics.setColor(new Color(255, 255, 255, 18));
+        graphics.fillRoundRect(x, y, width, height, 18, 18);
+        graphics.setColor(HUD_BORDER_COLOR);
+        graphics.drawRoundRect(x, y, width, height, 18, 18);
+
+        int col1 = x + 18;
+        int col2 = x + width / 3 + 8;
+        int col3 = x + 2 * width / 3 + 4;
+
+        drawLabel(graphics, "FINISHED AT", col1, y + 24);
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(Color.WHITE);
+        graphics.drawString(formatGameOverDateTime(), col1, y + 50);
+
+        drawLabel(graphics, "LEVEL", col2, y + 24);
+        graphics.setFont(HUD_VALUE_FONT);
+        graphics.setColor(HUD_TARGET_COLOR);
+        graphics.drawString(String.valueOf(state.getCurLevelNumber() + 1), col2, y + 54);
+
+        drawLabel(graphics, "ACTIVE TIME", col3, y + 24);
+        graphics.setFont(HUD_VALUE_FONT);
+        graphics.setColor(HUD_ACCENT_COLOR);
+        graphics.drawString(formatDuration(activePlayTimeMillis), col3, y + 54);
+    }
+
+    private void paintCurrentScoreSummary(Graphics2D graphics, int x, int y, int width, int height) {
+        graphics.setColor(new Color(255, 255, 255, 18));
+        graphics.fillRoundRect(x, y, width, height, 18, 18);
+        graphics.setColor(HUD_BORDER_COLOR);
+        graphics.drawRoundRect(x, y, width, height, 18, 18);
+
+        drawLabel(graphics, "YOUR SCORE", x + 18, y + 22);
+        graphics.setFont(HUD_SCORE_FONT);
+        graphics.setColor(Color.WHITE);
+        graphics.drawString(String.valueOf(state.getScore()), x + 18, y + 50);
+
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(isCurrentScoreQualified() ? HUD_ACCENT_COLOR : HUD_MUTED_COLOR);
+        FontMetrics metrics = graphics.getFontMetrics();
+        String statusText = isCurrentScoreQualified() ? "Qualified for the leaderboard" : "Below leaderboard threshold";
+        graphics.drawString(
+                statusText,
+                x + width - 18 - metrics.stringWidth(statusText),
+                y + 40
+        );
+    }
+
+    private void paintLeaderboard(Graphics2D graphics, int x, int y, int width, int height) {
+        graphics.setColor(new Color(255, 255, 255, 18));
+        graphics.fillRoundRect(x, y, width, height, 18, 18);
+        graphics.setColor(HUD_BORDER_COLOR);
+        graphics.drawRoundRect(x, y, width, height, 18, 18);
+
+        drawLabel(graphics, "LEADERBOARD", x + 18, y + 22);
+
+        int rankX = x + 24;
+        int nameX = x + 86;
+        int scoreX = x + width - 110;
+        int headerY = y + 42;
+        int firstRowY = y + 66;
+        int rowStep = 16;
+
+        graphics.setFont(HUD_LABEL_FONT);
+        graphics.setColor(HUD_MUTED_COLOR);
+        graphics.drawString("#", rankX, headerY);
+        graphics.drawString("PLAYER", nameX, headerY);
+        graphics.drawString("SCORE", scoreX, headerY);
+
+        int currentLeaderboardIndex = findCurrentScoreIndex();
+        for (int i = 0; i < state.getTopScores().size(); i++) {
+            Score score = state.getTopScores().get(i);
+            int itemY = firstRowY + i * rowStep;
+            boolean highlight = i == currentLeaderboardIndex;
+
+            if (highlight) {
+                graphics.setColor(new Color(74, 226, 196, 36));
+                graphics.fillRoundRect(x + 12, itemY - 12, width - 24, 18, 10, 10);
+            }
+
+            graphics.setFont(HUD_SMALL_FONT);
+            graphics.setColor(i < 3 ? HUD_TARGET_COLOR : STATUS_COLOR);
+            graphics.drawString(String.valueOf(i + 1), rankX, itemY);
+            graphics.drawString(score.getName(), nameX, itemY);
+
+            String scoreText = String.valueOf(score.getScore());
+            FontMetrics metrics = graphics.getFontMetrics();
+            graphics.drawString(scoreText, scoreX + 52 - metrics.stringWidth(scoreText), itemY);
+        }
+    }
+
+    private void paintNameEntry(Graphics2D graphics, int x, int y, int width, int height) {
+        graphics.setColor(new Color(255, 235, 140, 28));
+        graphics.fillRoundRect(x, y, width, height, 18, 18);
+        graphics.setColor(new Color(255, 214, 102, 120));
+        graphics.drawRoundRect(x, y, width, height, 18, 18);
+
+        drawLabel(graphics, "NEW HIGH SCORE", x + 18, y + 20);
+
+        String prefix = YOU_NAME;
+        String typedName = nameInput.substring(Math.min(prefix.length(), nameInput.length()));
+
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(HUD_MUTED_COLOR);
+        graphics.drawString("Enter saves the result. ESC starts a new run.", x + width - 250, y + 20);
+
+        graphics.setFont(OVERLAY_BODY_FONT);
+        graphics.setColor(Color.WHITE);
+        graphics.drawString("Name", x + 18, y + 42);
+
+        int fieldX = x + 92;
+        int fieldY = y + 11;
+        int fieldWidth = width - 110;
+        int fieldHeight = 32;
+
+        graphics.setColor(new Color(0, 0, 0, 70));
+        graphics.fillRoundRect(fieldX, fieldY, fieldWidth, fieldHeight, 14, 14);
+        graphics.setColor(new Color(255, 255, 255, 70));
+        graphics.drawRoundRect(fieldX, fieldY, fieldWidth, fieldHeight, 14, 14);
+
+        graphics.setFont(OVERLAY_INPUT_FONT);
+        graphics.setColor(Color.WHITE);
+        String displayName = typedName.isBlank() ? "Type at least " + NAME_MIN_LENGTH + " characters" : typedName;
+        graphics.drawString(displayName, fieldX + 12, fieldY + 22);
+
+        if (!typedName.isBlank()) {
+            FontMetrics metrics = graphics.getFontMetrics();
+            int caretX = fieldX + 12 + metrics.stringWidth(typedName) + 2;
+            graphics.setColor(HUD_TARGET_COLOR);
+            graphics.drawLine(caretX, fieldY + 7, caretX, fieldY + 25);
         }
     }
 
     private void paintPauseArea(Graphics2D bufferGraphics) {
-        bufferGraphics.setColor(Color.BLACK);
-        bufferGraphics.fillRect(200, 120, Config.WIDTH - 400, 500);
-        bufferGraphics.setColor(Color.GRAY);
-        bufferGraphics.drawRect(200, 120, Config.WIDTH - 400, 500);
+        Rectangle panel = createCenteredOverlayPanel(700, 430);
+        paintOverlayCard(bufferGraphics, panel);
 
         bufferGraphics.setColor(Color.WHITE);
-        bufferGraphics.setFont(new Font("Arial", Font.BOLD, 48));
-        bufferGraphics.drawString("Pause", 470, 180);
+        bufferGraphics.setFont(OVERLAY_TITLE_FONT);
+        drawCenteredString(bufferGraphics, "Paused", panel.x + panel.width / 2, panel.y + 54);
 
-        bufferGraphics.setFont(new Font("Arial", Font.PLAIN, 24));
-        int yOffset = 210;
-        int inputX = 250;
-        int i = 1;
-        int IMAGE_SHIFT = 17;
-        int SIZE = 40;
-        bufferGraphics.drawString("Controls:", inputX, yOffset + SIZE * i++);
-        bufferGraphics.drawString("left, right, up, down ", inputX, yOffset + SIZE * i++);
-        bufferGraphics.drawString("space: pause", inputX, yOffset + SIZE * i++);
-        bufferGraphics.drawString("ESC: return", inputX, yOffset + SIZE * i++);
-        i++;
-        bufferGraphics.drawString("Enemies:", inputX, yOffset + SIZE * i++);
-        paintLegendBall(bufferGraphics, inputX, yOffset, i, IMAGE_SHIFT, ItemAreaType.InField, ItemType.STD);
-        bufferGraphics.drawString("standard", inputX + 30, yOffset + SIZE * i++);
+        bufferGraphics.setFont(HUD_SMALL_FONT);
+        bufferGraphics.setColor(HUD_MUTED_COLOR);
+        drawCenteredString(bufferGraphics, "Space resumes the run. Use this screen as a quick tactical reference.", panel.x + panel.width / 2, panel.y + 78);
 
-        paintLegendBall(bufferGraphics, inputX, yOffset, i, IMAGE_SHIFT, ItemAreaType.InField, ItemType.DESTROYER);
-        bufferGraphics.drawString("destroyer", inputX + 30, yOffset + SIZE * i++);
+        int leftX = panel.x + 34;
+        int rightX = panel.x + panel.width / 2 + 18;
+        int topY = panel.y + 116;
 
-        paintLegendBall(bufferGraphics, inputX, yOffset, i, IMAGE_SHIFT, ItemAreaType.OutFiled, ItemType.STD);
-        bufferGraphics.drawString("ground", inputX + 30, yOffset + SIZE * i++);
+        paintPauseSection(bufferGraphics, "Controls", leftX, topY, 270, 110);
+        paintPauseTextRow(bufferGraphics, leftX + 18, topY + 42, "Arrow keys", "move");
+        paintPauseTextRow(bufferGraphics, leftX + 18, topY + 68, "Space", "resume / pause");
+        paintPauseTextRow(bufferGraphics, leftX + 18, topY + 94, "ESC", "return after game over");
 
-        i = 1;
-        inputX = 620;
+        paintPauseSection(bufferGraphics, "Enemies", leftX, topY + 132, 270, 130);
+        paintLegendRow(bufferGraphics, leftX + 18, topY + 174, ItemAreaType.InField, ItemType.STD, "standard");
+        paintLegendRow(bufferGraphics, leftX + 18, topY + 206, ItemAreaType.InField, ItemType.DESTROYER, "destroyer");
+        paintLegendRow(bufferGraphics, leftX + 18, topY + 238, ItemAreaType.OutFiled, ItemType.STD, "ground");
 
-        bufferGraphics.drawString("Areas:", inputX, yOffset + SIZE * i++);
+        paintPauseSection(bufferGraphics, "Field Objects", rightX, topY, 300, 110);
+        paintSliderLegendRow(bufferGraphics, rightX + 18, topY + 46, "unstoppable zone");
+        paintPauseTextRow(bufferGraphics, rightX + 18, topY + 80, "Goal", "capture target area");
 
-        switchOnSlidersStrikes(bufferGraphics);
-        bufferGraphics.drawRect(inputX, yOffset + SIZE * i - IMAGE_SHIFT, 20, 20);
-        switchOffSlidersStrikes(bufferGraphics);
-        bufferGraphics.drawString("unstoppable", inputX + 30, yOffset + SIZE * i++);
-
-        i += 3;
-        bufferGraphics.drawString("Bonuses:", inputX, yOffset + SIZE * i++);
-
-        bufferGraphics.drawImage(BonusType.LIFE.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
-        bufferGraphics.drawString("life", inputX + 30, yOffset + SIZE * i++);
-
-        bufferGraphics.drawImage(BonusType.HEAD_SPEED_UP.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
-        bufferGraphics.drawString("speed up", inputX + 30, yOffset + SIZE * i++);
-
-        bufferGraphics.drawImage(BonusType.SLOW_DOWN.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
-        bufferGraphics.drawString("slow down", inputX + 30, yOffset + SIZE * i++);
-
-        bufferGraphics.drawImage(BonusType.BOMB.image, inputX, yOffset + SIZE * i - IMAGE_SHIFT, null);
-        bufferGraphics.drawString("bomb", inputX + 30, yOffset + SIZE * i++);
+        paintPauseSection(bufferGraphics, "Bonuses", rightX, topY + 132, 300, 130);
+        paintBonusLegendRow(bufferGraphics, rightX + 18, topY + 174, BonusType.LIFE, "life");
+        paintBonusLegendRow(bufferGraphics, rightX + 18, topY + 206, BonusType.HEAD_SPEED_UP, "speed up");
+        paintBonusLegendRow(bufferGraphics, rightX + 18, topY + 238, BonusType.SLOW_DOWN, "slow down");
+        paintBonusLegendRow(bufferGraphics, rightX + 150, topY + 174, BonusType.BOMB, "bomb");
     }
 
     private void paintLegendBall(Graphics2D bufferGraphics, int inputX, int yOffset, int i, int IMAGE_SHIFT, ItemAreaType itemAreaType, ItemType itemType) {
         bufferGraphics.setColor(calcColor(itemAreaType, itemType));
         bufferGraphics.fillOval(inputX, yOffset + 40 * i - IMAGE_SHIFT, 2 * CELL_SIZE, 2 * CELL_SIZE);
         bufferGraphics.setColor(Color.WHITE);
+    }
+
+    private void paintPauseSection(Graphics2D graphics, String title, int x, int y, int width, int height) {
+        graphics.setColor(new Color(255, 255, 255, 18));
+        graphics.fillRoundRect(x, y, width, height, 18, 18);
+        graphics.setColor(HUD_BORDER_COLOR);
+        graphics.drawRoundRect(x, y, width, height, 18, 18);
+        graphics.setFont(HUD_LABEL_FONT);
+        graphics.setColor(HUD_MUTED_COLOR);
+        graphics.drawString(title.toUpperCase(), x + 16, y + 20);
+    }
+
+    private void paintPauseTextRow(Graphics2D graphics, int x, int y, String key, String description) {
+        graphics.setFont(HUD_LABEL_FONT);
+        graphics.setColor(Color.WHITE);
+        graphics.drawString(key, x, y);
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(HUD_MUTED_COLOR);
+        graphics.drawString(description, x + 110, y);
+    }
+
+    private void paintLegendRow(Graphics2D graphics, int x, int y, ItemAreaType areaType, ItemType itemType, String label) {
+        graphics.setColor(calcColor(areaType, itemType));
+        graphics.fillOval(x, y - 12, 16, 16);
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(Color.WHITE);
+        graphics.drawString(label, x + 28, y);
+    }
+
+    private void paintSliderLegendRow(Graphics2D graphics, int x, int y, String label) {
+        switchOnSlidersStrikes(graphics);
+        graphics.drawRect(x, y - 13, 18, 18);
+        switchOffSlidersStrikes(graphics);
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(Color.WHITE);
+        graphics.drawString(label, x + 30, y);
+    }
+
+    private void paintBonusLegendRow(Graphics2D graphics, int x, int y, BonusType bonusType, String label) {
+        graphics.drawImage(bonusType.image, x, y - 15, 18, 18, null);
+        graphics.setFont(HUD_SMALL_FONT);
+        graphics.setColor(Color.WHITE);
+        graphics.drawString(label, x + 28, y);
     }
 
     private Color calcColor(ItemAreaType type, ItemType itemType) {
@@ -425,6 +609,59 @@ public class XonixApp extends JFrame implements GameOverListener {
         if (state.isPause()) {
             paintPauseArea(graphics);
         }
+    }
+
+    private Rectangle createCenteredOverlayPanel(int preferredWidth, int preferredHeight) {
+        int width = Math.min(preferredWidth, Config.WIDTH - 140);
+        int height = Math.min(preferredHeight, Config.HEIGHT - 180);
+        int x = (Config.WIDTH - width) / 2;
+        int y = Math.max(MIN_Y + 32, (Config.HEIGHT - height) / 2);
+        return new Rectangle(x, y, width, height);
+    }
+
+    private void paintOverlayCard(Graphics2D graphics, Rectangle panel) {
+        graphics.setColor(OVERLAY_BACKDROP);
+        graphics.fillRect(0, 0, Config.WIDTH, Config.HEIGHT);
+        graphics.setColor(OVERLAY_PANEL);
+        graphics.fillRoundRect(panel.x, panel.y, panel.width, panel.height, 28, 28);
+        graphics.setColor(OVERLAY_PANEL_BORDER);
+        graphics.drawRoundRect(panel.x, panel.y, panel.width, panel.height, 28, 28);
+    }
+
+    private void drawCenteredString(Graphics2D graphics, String text, int centerX, int baselineY) {
+        FontMetrics metrics = graphics.getFontMetrics();
+        graphics.drawString(text, centerX - metrics.stringWidth(text) / 2, baselineY);
+    }
+
+    private String formatGameOverDateTime() {
+        long timestamp = gameOverTimestamp != null ? gameOverTimestamp : System.currentTimeMillis();
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+        return GAME_OVER_DATE_TIME_FORMAT.format(dateTime);
+    }
+
+    private String formatDuration(long durationMillis) {
+        long totalSeconds = durationMillis / 1000;
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+        if (hours > 0) {
+            return String.format("%d:%02d:%02d", hours, minutes, seconds);
+        }
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
+    private boolean isCurrentScoreQualified() {
+        return state.isEnterName() || findCurrentScoreIndex() >= 0;
+    }
+
+    private int findCurrentScoreIndex() {
+        for (int i = 0; i < state.getTopScores().size(); i++) {
+            Score score = state.getTopScores().get(i);
+            if (score.getScore() == state.getScore() && !score.getName().equals("***")) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private void paintHud(Graphics2D graphics) {
@@ -553,6 +790,9 @@ public class XonixApp extends JFrame implements GameOverListener {
         // restore
         nameInput.delete(0, nameInput.length());
         nameInput.append(YOU_NAME);
+        if (gameOverTimestamp == null) {
+            gameOverTimestamp = System.currentTimeMillis();
+        }
     }
 
     private static void createSplashScreen() {
