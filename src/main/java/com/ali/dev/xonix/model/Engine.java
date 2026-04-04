@@ -79,9 +79,12 @@ public class Engine {
             List<String> availableBonuses = state.getCurLevel().getAvailableBonuses();
             if (state.tickId % (TIME_FOR_BONUS_MS / TICK_TIME_MS) == 0 && availableBonuses.size()>0) {
                 var b = new Bonus();
-                b.pos = new XY(random.nextInt(GRID_SIZE_X - 2), random.nextInt(GRID_SIZE_Y - 2));
-                b.type = BonusType.valueOf(availableBonuses.get(random.nextInt(availableBonuses.size())));
                 b.size = new XY(2, 2);
+                b.pos = new XY(
+                        randomPlayableCoordinate(GRID_SIZE_X, b.size.x),
+                        randomPlayableCoordinate(GRID_SIZE_Y, b.size.y)
+                );
+                b.type = BonusType.valueOf(availableBonuses.get(random.nextInt(availableBonuses.size())));
                 b.lastTick = state.tickId + BONUS_LIVE_MS / TICK_TIME_MS;
                 state.bonuses.add(b);
             }
@@ -158,6 +161,12 @@ public class Engine {
         });
         state.bonuses.removeAll(bonuses);
 
+    }
+
+    private int randomPlayableCoordinate(int gridSize, int entitySize) {
+        int minCoordinate = 2;
+        int availablePositions = gridSize - entitySize - 3;
+        return minCoordinate + random.nextInt(availablePositions);
     }
 
     private boolean hasCollision(Head item, XY targetPos, XY size) {

@@ -19,7 +19,7 @@ File: [src/main/java/com/ali/dev/xonix/model/State.java](/home/bob/IdeaProjects/
 
 `readScoreFile()` assumes every line has the format `name;score` and parses without validation. Empty lines, partial writes, or manual edits can cause `ArrayIndexOutOfBoundsException` or `NumberFormatException` during startup.
 
-### 4. Bonuses can spawn on the border area
+### 4. `BUG-004`: Bonuses can spawn on the border area
 File: [src/main/java/com/ali/dev/xonix/model/Engine.java](/home/bob/IdeaProjects/xonix/src/main/java/com/ali/dev/xonix/model/Engine.java)
 
 Bonus coordinates are generated in `0..GRID_SIZE_X-3` and `0..GRID_SIZE_Y-3`, which includes the occupied border rows and columns. This allows bonuses to appear in invalid or inaccessible cells.
